@@ -58,6 +58,6 @@ debug.log
 # cloned_repos/
 
 # Large binary files that might be too big for GitHub
-# Uncomment if videos are too large (>100MB)
-# *.webm
+*.mp4
+*.webm
 
