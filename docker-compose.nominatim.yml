@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  nominatim:
+    image: mediagis/nominatim:4.3
+    container_name: nominatim
+    environment:
+      # OSM Data Source - Using local file (mounted to /nominatim/data.osm.pbf below)
+      # Use PBF_PATH for local files, PBF_URL for downloading
+      PBF_PATH: /nominatim/data.osm.pbf
+      REPLICATION_URL: https://download.geofabrik.de/asia/malaysia-singapore-brunei-updates
+      
+      # Import settings
+      IMPORT_WIKIPEDIA: "false"
+      NOMINATIM_PASSWORD: ${NOMINATIM_PASSWORD:-changeme123}
+      
+      # Performance settings (optimized for 12 CPU cores, 23GB RAM)
+      THREADS: ${NOMINATIM_THREADS:-8}  # Increased from 4 to 8 for better concurrency
+      
+      # Language settings for Malaysia
+      NOMINATIM_LANGUAGE: en,ms
+      
+      # PostgreSQL optimization (increased for better caching with available RAM)
+      POSTGRES_SHARED_BUFFERS: 2GB  # Increased from 1GB for better query caching
+      POSTGRES_MAINTENANCE_WORK_MEM: 1GB  # Increased from 512MB for faster maintenance
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 4GB  # Increased from 2GB for better query planning
+      POSTGRES_WORK_MEM: 100MB  # Increased from 50MB for complex queries
+    
+    ports:
+      - "${NOMINATIM_PORT:-8080}:8080"  # Nominatim API
+      - "${POSTGRES_PORT:-5433}:5432"   # PostgreSQL (different port to avoid conflicts)
+    
+    volumes:
+      - nominatim-data:/var/lib/postgresql/12/main
+      - nominatim-flatnode:/flatnode
+      # Mount local OSM PBF file to the expected location
+      - ./malaysia-singapore-brunei-251215.osm.pbf:/nominatim/data.osm.pbf
+    
+    shm_size: 2g  # Increased from 1g for better shared memory performance
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 3600s  # Allow 1 hour for initial import
+    
+    # Resource limits (adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  nominatim-data:
+    driver: local
+  nominatim-flatnode:
+    driver: local
+

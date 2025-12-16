@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Spots API - JSON Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .panel h2 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        #jsonOutput {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .endpoint-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .endpoint-btn {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .endpoint-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .api-url {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚁 Drone Spots API - JSON Viewer</h1>
+            <p>Test and view API responses in a formatted way</p>
+        </div>
+        
+        <div class="content">
+            <div class="panel">
+                <h2>📡 API Request</h2>
+                
+                <div class="status" id="status"></div>
+                
+                <div class="input-group">
+                    <label>API Base URL</label>
+                    <input type="text" id="apiBaseUrl" value="http://192.168.0.145:8001" placeholder="http://your-ip:8001">
+                </div>
+                
+                <div class="input-group">
+                    <label>Endpoint</label>
+                    <select id="endpoint">
+                        <option value="/">Root</option>
+                        <option value="/search" selected>Search</option>
+                        <option value="/spot-types">Spot Types</option>
+                        <option value="/no-fly-zones">No-Fly Zones</option>
+                        <option value="/elevation-path">Elevation Path</option>
+                    </select>
+                </div>
+                
+                <div id="searchParams" class="input-group">
+                    <label>Address</label>
+                    <input type="text" id="address" placeholder="Kuala Lumpur" value="Kuala Lumpur">
+                </div>
+                
+                <div id="searchParams2" class="input-group">
+                    <label>Radius (km)</label>
+                    <input type="number" id="radius" value="10" step="0.1" min="1" max="100">
+                </div>
+                
+                <div id="searchParams3" class="input-group">
+                    <label>Max Results</label>
+                    <input type="number" id="maxResults" value="5" min="1" max="50">
+                </div>
+                
+                <div id="noflyParams" class="input-group" style="display: none;">
+                    <label>Latitude</label>
+                    <input type="number" id="latitude" value="3.1390" step="0.0001">
+                </div>
+                
+                <div id="noflyParams2" class="input-group" style="display: none;">
+                    <label>Longitude</label>
+                    <input type="number" id="longitude" value="101.6869" step="0.0001">
+                </div>
+                
+                <div id="elevationParams" class="input-group" style="display: none;">
+                    <label>Start Latitude</label>
+                    <input type="number" id="startLat" value="3.1390" step="0.0001">
+                </div>
+                
+                <div id="elevationParams2" class="input-group" style="display: none;">
+                    <label>Start Longitude</label>
+                    <input type="number" id="startLon" value="101.6869" step="0.0001">
+                </div>
+                
+                <div id="elevationParams3" class="input-group" style="display: none;">
+                    <label>End Latitude</label>
+                    <input type="number" id="endLat" value="3.2000" step="0.0001">
+                </div>
+                
+                <div id="elevationParams4" class="input-group" style="display: none;">
+                    <label>End Longitude</label>
+                    <input type="number" id="endLon" value="101.7500" step="0.0001">
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="makeRequest()">🚀 Send Request</button>
+                    <button class="btn-secondary" onclick="clearOutput()">🗑️ Clear</button>
+                    <button class="btn-success" onclick="copyToClipboard()">📋 Copy JSON</button>
+                </div>
+                
+                <div class="api-url" id="apiUrl" style="display: none;"></div>
+            </div>
+            
+            <div class="panel">
+                <h2>📄 JSON Response</h2>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Loading...</p>
+                </div>
+                <div id="jsonOutput">No request made yet. Click "Send Request" to fetch data.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-detect API URL from current page
+        function detectApiUrl() {
+            const currentUrl = window.location.href;
+            const urlObj = new URL(currentUrl);
+            const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
+            document.getElementById('apiBaseUrl').value = baseUrl;
+        }
+        
+        // Run on page load
+        window.addEventListener('load', () => {
+            detectApiUrl();
+            updateEndpointParams();
+        });
+        
+        // Update form based on selected endpoint
+        document.getElementById('endpoint').addEventListener('change', updateEndpointParams);
+        
+        function updateEndpointParams() {
+            const endpoint = document.getElementById('endpoint').value;
+            
+            // Hide all parameter groups
+            document.getElementById('searchParams').style.display = 'none';
+            document.getElementById('searchParams2').style.display = 'none';
+            document.getElementById('searchParams3').style.display = 'none';
+            document.getElementById('noflyParams').style.display = 'none';
+            document.getElementById('noflyParams2').style.display = 'none';
+            document.getElementById('elevationParams').style.display = 'none';
+            document.getElementById('elevationParams2').style.display = 'none';
+            document.getElementById('elevationParams3').style.display = 'none';
+            document.getElementById('elevationParams4').style.display = 'none';
+            
+            // Show relevant parameters
+            if (endpoint === '/search') {
+                document.getElementById('searchParams').style.display = 'block';
+                document.getElementById('searchParams2').style.display = 'block';
+                document.getElementById('searchParams3').style.display = 'block';
+            } else if (endpoint === '/no-fly-zones') {
+                document.getElementById('noflyParams').style.display = 'block';
+                document.getElementById('noflyParams2').style.display = 'block';
+            } else if (endpoint === '/elevation-path') {
+                document.getElementById('elevationParams').style.display = 'block';
+                document.getElementById('elevationParams2').style.display = 'block';
+                document.getElementById('elevationParams3').style.display = 'block';
+                document.getElementById('elevationParams4').style.display = 'block';
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function makeRequest() {
+            const baseUrl = document.getElementById('apiBaseUrl').value.trim();
+            const endpoint = document.getElementById('endpoint').value;
+            const output = document.getElementById('jsonOutput');
+            const loading = document.getElementById('loading');
+            const apiUrlDiv = document.getElementById('apiUrl');
+            
+            if (!baseUrl) {
+                showStatus('Please enter an API base URL', 'error');
+                return;
+            }
+            
+            // Build URL with parameters
+            let url = baseUrl + endpoint;
+            const params = new URLSearchParams();
+            
+            if (endpoint === '/search') {
+                const address = document.getElementById('address').value;
+                const radius = document.getElementById('radius').value;
+                const maxResults = document.getElementById('maxResults').value;
+                if (address) params.append('address', address);
+                if (radius) params.append('radius_km', radius);
+                if (maxResults) params.append('max_results', maxResults);
+            } else if (endpoint === '/no-fly-zones') {
+                const lat = document.getElementById('latitude').value;
+                const lon = document.getElementById('longitude').value;
+                if (lat) params.append('latitude', lat);
+                if (lon) params.append('longitude', lon);
+                params.append('radius_km', '50');
+            } else if (endpoint === '/elevation-path') {
+                const startLat = document.getElementById('startLat').value;
+                const startLon = document.getElementById('startLon').value;
+                const endLat = document.getElementById('endLat').value;
+                const endLon = document.getElementById('endLon').value;
+                if (startLat) params.append('start_latitude', startLat);
+                if (startLon) params.append('start_longitude', startLon);
+                if (endLat) params.append('end_latitude', endLat);
+                if (endLon) params.append('end_longitude', endLon);
+                params.append('flight_altitude_m', '50');
+            }
+            
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+            
+            // Show loading
+            loading.style.display = 'block';
+            output.style.display = 'none';
+            apiUrlDiv.textContent = `Request URL: ${url}`;
+            apiUrlDiv.style.display = 'block';
+            
+            // Make request
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    output.textContent = JSON.stringify(data, null, 2);
+                    output.style.display = 'block';
+                    loading.style.display = 'none';
+                    showStatus('Request successful!', 'success');
+                })
+                .catch(error => {
+                    output.textContent = `Error: ${error.message}\n\nMake sure:\n1. The API server is running\n2. The base URL is correct\n3. You're on the same network\n4. The firewall allows connections`;
+                    output.style.display = 'block';
+                    loading.style.display = 'none';
+                    showStatus('Request failed: ' + error.message, 'error');
+                });
+        }
+        
+        function clearOutput() {
+            document.getElementById('jsonOutput').textContent = 'No request made yet. Click "Send Request" to fetch data.';
+            document.getElementById('apiUrl').style.display = 'none';
+            document.getElementById('status').style.display = 'none';
+        }
+        
+        function copyToClipboard() {
+            const output = document.getElementById('jsonOutput').textContent;
+            if (output && output !== 'No request made yet. Click "Send Request" to fetch data.') {
+                navigator.clipboard.writeText(output).then(() => {
+                    showStatus('JSON copied to clipboard!', 'success');
+                }).catch(err => {
+                    showStatus('Failed to copy: ' + err, 'error');
+                });
+            } else {
+                showStatus('No JSON to copy', 'info');
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                makeRequest();
+            }
+        });
+    </script>
+</body>
+</html>
+

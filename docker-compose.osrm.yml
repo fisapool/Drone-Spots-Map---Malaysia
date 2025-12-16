@@ -1,0 +1,42 @@
+services:
+  osrm:
+    image: osrm/osrm-backend:latest
+    container_name: osrm
+    command: >
+      sh -c "
+      if [ ! -f /data/malaysia-singapore-brunei-251215.osrm ]; then
+        echo 'Extracting OSM data...'
+        osrm-extract -p /opt/car.lua /data/malaysia-singapore-brunei-251215.osm.pbf &&
+        echo 'Partitioning...'
+        osrm-partition /data/malaysia-singapore-brunei-251215.osrm &&
+        echo 'Customizing...'
+        osrm-customize /data/malaysia-singapore-brunei-251215.osrm &&
+        echo 'Processing complete!'
+      else
+        echo 'OSRM data already processed, starting server...'
+      fi &&
+      osrm-routed --algorithm mld /data/malaysia-singapore-brunei-251215.osrm
+      "
+    ports:
+      - "${OSRM_PORT:-5000}:5000"
+    volumes:
+      - ./malaysia-singapore-brunei-251215.osm.pbf:/data/malaysia-singapore-brunei-251215.osm.pbf:ro
+      - osrm-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/route/v1/driving/101.6869,3.1390;101.6869,3.1390?overview=false"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1800s  # Allow 30 minutes for initial processing
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  osrm-data:
+    driver: local
+
