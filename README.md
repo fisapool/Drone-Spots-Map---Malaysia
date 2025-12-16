@@ -22,22 +22,28 @@ A comprehensive web application for finding the best drone flying locations in M
 ### Facebook HQ View Demo (Complete)
 Watch the complete demonstration of the Facebook HQ view mode:
 
-https://github.com/fisapool/Drone-Spots-Map---Malaysia/blob/main/search_demo_facebook_hq.webm
+**MP4 (Recommended):** [search_demo_facebook_hq.mp4](search_demo_facebook_hq.mp4)  
+**WebM:** [search_demo_facebook_hq.webm](search_demo_facebook_hq.webm)
 
 ### Facebook View Demo
 Standard Facebook view demonstration:
 
-https://github.com/fisapool/Drone-Spots-Map---Malaysia/blob/main/search_demo_facebook.webm
+**MP4 (Recommended):** [search_demo_facebook.mp4](search_demo_facebook.mp4)  
+**WebM:** [search_demo_facebook.webm](search_demo_facebook.webm)
 
 ### Satellite View Demo
 Satellite view mode demonstration:
 
-https://github.com/fisapool/Drone-Spots-Map---Malaysia/blob/main/search_demo_satellite.webm
+**MP4 (Recommended):** [search_demo_satellite.mp4](search_demo_satellite.mp4)  
+**WebM:** [search_demo_satellite.webm](search_demo_satellite.webm)
 
 ### Standard Search Demo
 Basic search functionality demonstration:
 
-https://github.com/fisapool/Drone-Spots-Map---Malaysia/blob/main/search_demo.webm
+**MP4 (Recommended):** [search_demo.mp4](search_demo.mp4)  
+**WebM:** [search_demo.webm](search_demo.webm)
+
+> **Note:** To convert WebM files to MP4, see [CONVERT_TO_MP4.md](CONVERT_TO_MP4.md)
 
 ## 🚀 Quick Start
 
