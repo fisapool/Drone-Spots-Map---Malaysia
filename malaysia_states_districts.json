@@ -1,0 +1,1470 @@
+{
+  "states": [
+    {
+      "name": "Johor",
+      "code": "JH",
+      "districts": [
+        "Batu Pahat",
+        "Johor Bahru",
+        "Kluang",
+        "Kota Tinggi",
+        "Kulai",
+        "Mersing",
+        "Muar",
+        "Pontian",
+        "Segamat",
+        "Tangkak"
+      ],
+      "major_cities": [
+        "Johor Bahru",
+        "Batu Pahat",
+        "Muar",
+        "Kluang",
+        "Segamat",
+        "Kulai",
+        "Pasir Gudang",
+        "Skudai"
+      ],
+      "postal_code_range": {
+        "start": "80000",
+        "end": "86999"
+      },
+      "postal_codes": [
+        "80500",
+        "85594",
+        "86900"
+      ],
+      "major_city_postal_codes": {
+        "Johor Bahru": [
+          "80000",
+          "81300"
+        ],
+        "Batu Pahat": [
+          "83000"
+        ],
+        "Muar": [
+          "84000"
+        ],
+        "Kluang": [
+          "86000"
+        ],
+        "Segamat": [
+          "85000"
+        ],
+        "Kulai": [
+          "81000"
+        ]
+      },
+      "district_postal_codes": {
+        "Johor Bahru": [
+          "80000",
+          "81300"
+        ],
+        "Batu Pahat": [
+          "83000"
+        ],
+        "Muar": [
+          "84000"
+        ],
+        "Kluang": [
+          "86000"
+        ],
+        "Segamat": [
+          "85000"
+        ],
+        "Kulai": [
+          "81000"
+        ]
+      }
+    },
+    {
+      "name": "Kedah",
+      "code": "KH",
+      "districts": [
+        "Baling",
+        "Bandar Baharu",
+        "Kota Setar",
+        "Kuala Muda",
+        "Kubang Pasu",
+        "Kulim",
+        "Langkawi",
+        "Padang Terap",
+        "Pendang",
+        "Pokok Sena",
+        "Sik",
+        "Yan"
+      ],
+      "major_cities": [
+        "Alor Setar",
+        "Sungai Petani",
+        "Kulim",
+        "Langkawi",
+        "Jitra",
+        "Kuala Kedah"
+      ],
+      "postal_code_range": {
+        "start": "05000",
+        "end": "09810"
+      },
+      "postal_codes": [
+        "05000",
+        "05500",
+        "05502",
+        "09810"
+      ],
+      "major_city_postal_codes": {
+        "Alor Setar": [
+          "05000",
+          "05400"
+        ],
+        "Sungai Petani": [
+          "08000"
+        ],
+        "Kulim": [
+          "09000"
+        ],
+        "Langkawi": [
+          "07000"
+        ]
+      },
+      "district_postal_codes": {
+        "Kulim": [
+          "09000"
+        ],
+        "Langkawi": [
+          "07000"
+        ]
+      }
+    },
+    {
+      "name": "Kelantan",
+      "code": "KN",
+      "districts": [
+        "Bachok",
+        "Gua Musang",
+        "Jeli",
+        "Kota Bharu",
+        "Kuala Krai",
+        "Machang",
+        "Pasir Mas",
+        "Pasir Puteh",
+        "Tanah Merah",
+        "Tumpat"
+      ],
+      "major_cities": [
+        "Kota Bharu",
+        "Pasir Mas",
+        "Gua Musang",
+        "Kuala Krai",
+        "Tumpat"
+      ],
+      "postal_code_range": {
+        "start": "15000",
+        "end": "18500"
+      },
+      "postal_codes": [
+        "15000",
+        "15500",
+        "15502",
+        "18500"
+      ],
+      "major_city_postal_codes": {
+        "Kota Bharu": [
+          "15000",
+          "15100"
+        ],
+        "Pasir Mas": [
+          "17000"
+        ],
+        "Gua Musang": [
+          "18300"
+        ]
+      },
+      "district_postal_codes": {
+        "Kota Bharu": [
+          "15000",
+          "15100"
+        ],
+        "Pasir Mas": [
+          "17000"
+        ],
+        "Gua Musang": [
+          "18300"
+        ]
+      }
+    },
+    {
+      "name": "Malacca",
+      "code": "ML",
+      "districts": [
+        "Alor Gajah",
+        "Jasin",
+        "Melaka Tengah"
+      ],
+      "major_cities": [
+        "Malacca City",
+        "Alor Gajah",
+        "Jasin",
+        "Ayer Keroh"
+      ],
+      "postal_code_range": {
+        "start": "75000",
+        "end": "78309"
+      },
+      "postal_codes": [
+        "75000",
+        "75500",
+        "75502",
+        "76116",
+        "78309"
+      ],
+      "major_city_postal_codes": {
+        "Malacca City": [
+          "75000",
+          "75300"
+        ],
+        "Alor Gajah": [
+          "78000"
+        ],
+        "Jasin": [
+          "77000"
+        ]
+      },
+      "district_postal_codes": {
+        "Alor Gajah": [
+          "78000"
+        ],
+        "Jasin": [
+          "77000"
+        ]
+      }
+    },
+    {
+      "name": "Negeri Sembilan",
+      "code": "NS",
+      "districts": [
+        "Jelebu",
+        "Jempol",
+        "Kuala Pilah",
+        "Port Dickson",
+        "Rembau",
+        "Seremban",
+        "Tampin"
+      ],
+      "major_cities": [
+        "Seremban",
+        "Nilai",
+        "Port Dickson",
+        "Kuala Pilah",
+        "Tampin"
+      ],
+      "postal_code_range": {
+        "start": "70000",
+        "end": "73999"
+      },
+      "postal_codes": [
+        "70000",
+        "70500",
+        "70502",
+        "73509"
+      ],
+      "major_city_postal_codes": {
+        "Seremban": [
+          "70000",
+          "70100"
+        ],
+        "Nilai": [
+          "71800"
+        ],
+        "Port Dickson": [
+          "71000"
+        ],
+        "Kuala Pilah": [
+          "72000"
+        ]
+      },
+      "district_postal_codes": {
+        "Seremban": [
+          "70000",
+          "70100"
+        ],
+        "Port Dickson": [
+          "71000"
+        ],
+        "Kuala Pilah": [
+          "72000"
+        ]
+      }
+    },
+    {
+      "name": "Pahang",
+      "code": "PH",
+      "districts": [
+        "Bentong",
+        "Bera",
+        "Cameron Highlands",
+        "Jerantut",
+        "Kuantan",
+        "Lipis",
+        "Maran",
+        "Pekan",
+        "Raub",
+        "Rompin",
+        "Temerloh"
+      ],
+      "major_cities": [
+        "Kuantan",
+        "Temerloh",
+        "Bentong",
+        "Raub",
+        "Jerantut",
+        "Cameron Highlands"
+      ],
+      "postal_code_range": {
+        "start": "25000",
+        "end": "28800"
+      },
+      "postal_codes": [
+        "25000",
+        "25500",
+        "25502",
+        "28350",
+        "28800"
+      ],
+      "major_city_postal_codes": {
+        "Kuantan": [
+          "25000",
+          "25100"
+        ],
+        "Temerloh": [
+          "28000"
+        ],
+        "Bentong": [
+          "28700"
+        ],
+        "Raub": [
+          "27600"
+        ],
+        "Cameron Highlands": [
+          "39000"
+        ]
+      },
+      "district_postal_codes": {
+        "Kuantan": [
+          "25000",
+          "25100"
+        ],
+        "Temerloh": [
+          "28000"
+        ],
+        "Bentong": [
+          "28700"
+        ],
+        "Raub": [
+          "27600"
+        ],
+        "Cameron Highlands": [
+          "39000"
+        ]
+      }
+    },
+    {
+      "name": "Penang",
+      "code": "PN",
+      "districts": [
+        "Barat Daya",
+        "Seberang Perai Selatan",
+        "Seberang Perai Tengah",
+        "Seberang Perai Utara",
+        "Timur Laut"
+      ],
+      "major_cities": [
+        "George Town",
+        "Butterworth",
+        "Bayan Lepas",
+        "Bukit Mertajam",
+        "Nibong Tebal"
+      ],
+      "postal_code_range": {
+        "start": "10000",
+        "end": "14400"
+      },
+      "postal_codes": [
+        "10000",
+        "10500",
+        "10502",
+        "12414",
+        "14400"
+      ],
+      "major_city_postal_codes": {
+        "George Town": [
+          "10000",
+          "10100",
+          "10200",
+          "10300",
+          "10400"
+        ],
+        "Butterworth": [
+          "12000",
+          "12100"
+        ],
+        "Bayan Lepas": [
+          "11900"
+        ],
+        "Bukit Mertajam": [
+          "14000"
+        ]
+      }
+    },
+    {
+      "name": "Perak",
+      "code": "PK",
+      "districts": [
+        "Bagan Datuk",
+        "Batang Padang",
+        "Hilir Perak",
+        "Hulu Perak",
+        "Kampar",
+        "Kerian",
+        "Kinta",
+        "Kuala Kangsar",
+        "Larut, Matang dan Selama",
+        "Manjung",
+        "Muallim",
+        "Perak Tengah"
+      ],
+      "major_cities": [
+        "Ipoh",
+        "Taiping",
+        "Sitiawan",
+        "Teluk Intan",
+        "Kuala Kangsar",
+        "Kampar"
+      ],
+      "postal_code_range": {
+        "start": "30000",
+        "end": "36810"
+      },
+      "postal_codes": [
+        "30000",
+        "30500",
+        "30502",
+        "36810"
+      ],
+      "major_city_postal_codes": {
+        "Ipoh": [
+          "30000",
+          "30100",
+          "30200",
+          "30300",
+          "30400",
+          "30500",
+          "30600",
+          "30700",
+          "30800",
+          "30900",
+          "31000",
+          "31100",
+          "31200",
+          "31300",
+          "31400",
+          "31500",
+          "31600",
+          "31700",
+          "31800",
+          "31900",
+          "32000"
+        ],
+        "Taiping": [
+          "34000"
+        ],
+        "Sitiawan": [
+          "32000"
+        ],
+        "Teluk Intan": [
+          "36000"
+        ],
+        "Kuala Kangsar": [
+          "33000"
+        ],
+        "Kampar": [
+          "31900"
+        ]
+      },
+      "district_postal_codes": {
+        "Kuala Kangsar": [
+          "33000"
+        ],
+        "Kampar": [
+          "31900"
+        ]
+      }
+    },
+    {
+      "name": "Perlis",
+      "code": "PL",
+      "districts": [
+        "Kangar",
+        "Padang Besar",
+        "Arau",
+        "Perlis"
+      ],
+      "major_cities": [
+        "Kangar",
+        "Arau",
+        "Padang Besar"
+      ],
+      "postal_code_range": {
+        "start": "01000",
+        "end": "02800"
+      },
+      "postal_codes": [
+        "01000",
+        "01500",
+        "01502",
+        "02000"
+      ],
+      "major_city_postal_codes": {
+        "Kangar": [
+          "01000"
+        ],
+        "Arau": [
+          "02600"
+        ]
+      },
+      "district_postal_codes": {
+        "Kangar": [
+          "01000"
+        ],
+        "Arau": [
+          "02600"
+        ]
+      }
+    },
+    {
+      "name": "Sabah",
+      "code": "SB",
+      "districts": [
+        "Beaufort",
+        "Beluran",
+        "Keningau",
+        "Kinabalu",
+        "Kinabatangan",
+        "Kota Belud",
+        "Kota Kinabalu",
+        "Kota Marudu",
+        "Kuala Penyu",
+        "Kudat",
+        "Kunak",
+        "Lahad Datu",
+        "Nabawan",
+        "Papar",
+        "Penampang",
+        "Pitas",
+        "Putatan",
+        "Ranau",
+        "Sandakan",
+        "Semporna",
+        "Sipitang",
+        "Tambunan",
+        "Tawau",
+        "Telupid",
+        "Tenom",
+        "Tongod",
+        "Tuaran"
+      ],
+      "major_cities": [
+        "Kota Kinabalu",
+        "Sandakan",
+        "Tawau",
+        "Lahad Datu",
+        "Keningau",
+        "Semporna"
+      ],
+      "postal_code_range": {
+        "start": "88000",
+        "end": "91309"
+      },
+      "postal_codes": [
+        "88000",
+        "88500",
+        "88502",
+        "91309"
+      ],
+      "major_city_postal_codes": {
+        "Kota Kinabalu": [
+          "88000",
+          "88100",
+          "88200",
+          "88300",
+          "88400",
+          "88500",
+          "88600",
+          "88700",
+          "88800",
+          "88900"
+        ],
+        "Sandakan": [
+          "90000",
+          "90100"
+        ],
+        "Tawau": [
+          "91000"
+        ],
+        "Lahad Datu": [
+          "91100"
+        ],
+        "Keningau": [
+          "89000"
+        ]
+      },
+      "district_postal_codes": {
+        "Kinabalu": [
+          "88000",
+          "88100",
+          "88200",
+          "88300",
+          "88400",
+          "88500",
+          "88600",
+          "88700",
+          "88800",
+          "88900"
+        ],
+        "Sandakan": [
+          "90000",
+          "90100"
+        ],
+        "Tawau": [
+          "91000"
+        ],
+        "Lahad Datu": [
+          "91100"
+        ],
+        "Keningau": [
+          "89000"
+        ]
+      }
+    },
+    {
+      "name": "Sarawak",
+      "code": "SR",
+      "districts": [
+        "Asajaya",
+        "Baram",
+        "Bau",
+        "Belaga",
+        "Beluru",
+        "Betong",
+        "Bintulu",
+        "Bukit Mabong",
+        "Dalat",
+        "Daro",
+        "Julau",
+        "Kabong",
+        "Kanowit",
+        "Kapit",
+        "Kuching",
+        "Lawas",
+        "Limbang",
+        "Lubok Antu",
+        "Lundu",
+        "Maradong",
+        "Marudi",
+        "Matu",
+        "Meradong",
+        "Miri",
+        "Mukah",
+        "Pakan",
+        "Pusa",
+        "Samarahan",
+        "Saratok",
+        "Sarikei",
+        "Sebauh",
+        "Selangau",
+        "Serian",
+        "Sibu",
+        "Simunjan",
+        "Song",
+        "Sri Aman",
+        "Subis",
+        "Tanjung Manis",
+        "Tatau",
+        "Tebedu",
+        "Telang Usan"
+      ],
+      "major_cities": [
+        "Kuching",
+        "Miri",
+        "Sibu",
+        "Bintulu",
+        "Limbang",
+        "Sarikei"
+      ],
+      "postal_code_range": {
+        "start": "93000",
+        "end": "98859"
+      },
+      "postal_codes": [
+        "93000",
+        "93500",
+        "93502",
+        "98859"
+      ],
+      "major_city_postal_codes": {
+        "Kuching": [
+          "93000",
+          "93100",
+          "93200",
+          "93300",
+          "93400",
+          "93500",
+          "93600",
+          "93700",
+          "93800",
+          "93900"
+        ],
+        "Miri": [
+          "98000"
+        ],
+        "Sibu": [
+          "96000"
+        ],
+        "Bintulu": [
+          "97000"
+        ],
+        "Limbang": [
+          "98700"
+        ]
+      },
+      "district_postal_codes": {
+        "Kuching": [
+          "93000",
+          "93100",
+          "93200",
+          "93300",
+          "93400",
+          "93500",
+          "93600",
+          "93700",
+          "93800",
+          "93900"
+        ],
+        "Miri": [
+          "98000"
+        ],
+        "Sibu": [
+          "96000"
+        ],
+        "Bintulu": [
+          "97000"
+        ],
+        "Limbang": [
+          "98700"
+        ]
+      }
+    },
+    {
+      "name": "Selangor",
+      "code": "SL",
+      "districts": [
+        "Gombak",
+        "Hulu Langat",
+        "Hulu Selangor",
+        "Klang",
+        "Kuala Langat",
+        "Kuala Selangor",
+        "Petaling",
+        "Sabak Bernam",
+        "Sepang"
+      ],
+      "major_cities": [
+        "Shah Alam",
+        "Klang",
+        "Petaling Jaya",
+        "Subang Jaya",
+        "Ampang",
+        "Kajang",
+        "Selayang"
+      ],
+      "postal_code_range": {
+        "start": "40000",
+        "end": "48300"
+      },
+      "postal_codes": [
+        "40000",
+        "40500",
+        "40502",
+        "42000",
+        "48300"
+      ],
+      "major_city_postal_codes": {
+        "Shah Alam": [
+          "40000",
+          "40100",
+          "40200",
+          "40300",
+          "40400",
+          "40500",
+          "40600",
+          "40700",
+          "40800",
+          "40900"
+        ],
+        "Klang": [
+          "41000",
+          "41100",
+          "41200",
+          "41300",
+          "41400",
+          "41500",
+          "41600",
+          "41700",
+          "41800",
+          "41900"
+        ],
+        "Petaling Jaya": [
+          "46000",
+          "46100",
+          "46200",
+          "46300",
+          "46400",
+          "46500",
+          "46600",
+          "46700",
+          "46800",
+          "46900"
+        ],
+        "Subang Jaya": [
+          "47500",
+          "47600"
+        ],
+        "Ampang": [
+          "68000"
+        ],
+        "Kajang": [
+          "43000"
+        ]
+      },
+      "district_postal_codes": {
+        "Klang": [
+          "41000",
+          "41100",
+          "41200",
+          "41300",
+          "41400",
+          "41500",
+          "41600",
+          "41700",
+          "41800",
+          "41900"
+        ],
+        "Petaling": [
+          "46000",
+          "46100",
+          "46200",
+          "46300",
+          "46400",
+          "46500",
+          "46600",
+          "46700",
+          "46800",
+          "46900"
+        ]
+      }
+    },
+    {
+      "name": "Terengganu",
+      "code": "TR",
+      "districts": [
+        "Besut",
+        "Dungun",
+        "Hulu Terengganu",
+        "Kemaman",
+        "Kuala Nerus",
+        "Kuala Terengganu",
+        "Marang",
+        "Setiu"
+      ],
+      "major_cities": [
+        "Kuala Terengganu",
+        "Kemaman",
+        "Dungun",
+        "Marang"
+      ],
+      "postal_code_range": {
+        "start": "20000",
+        "end": "24300"
+      },
+      "postal_codes": [
+        "20000",
+        "20500",
+        "20502",
+        "24300"
+      ],
+      "major_city_postal_codes": {
+        "Kuala Terengganu": [
+          "20000",
+          "20100",
+          "20200",
+          "20300",
+          "20400",
+          "20500",
+          "20600",
+          "20700",
+          "20800",
+          "20900"
+        ],
+        "Kemaman": [
+          "24000"
+        ],
+        "Dungun": [
+          "23000"
+        ]
+      },
+      "district_postal_codes": {
+        "Kuala Terengganu": [
+          "20000",
+          "20100",
+          "20200",
+          "20300",
+          "20400",
+          "20500",
+          "20600",
+          "20700",
+          "20800",
+          "20900"
+        ],
+        "Kemaman": [
+          "24000"
+        ],
+        "Dungun": [
+          "23000"
+        ]
+      }
+    },
+    {
+      "name": "Federal Territory of Kuala Lumpur",
+      "code": "KL",
+      "districts": [
+        "Kuala Lumpur"
+      ],
+      "major_cities": [
+        "Kuala Lumpur"
+      ],
+      "postal_code_range": {
+        "start": "50000",
+        "end": "60000"
+      },
+      "postal_codes": [
+        "50000",
+        "60000"
+      ],
+      "major_city_postal_codes": {
+        "Kuala Lumpur": [
+          "50000",
+          "50050",
+          "50100",
+          "50150",
+          "50200",
+          "50250",
+          "50300",
+          "50350",
+          "50400",
+          "50450",
+          "50500",
+          "50550",
+          "50600",
+          "50650",
+          "50700",
+          "50750",
+          "50800",
+          "50850",
+          "50900",
+          "50950",
+          "51000",
+          "51050",
+          "51100",
+          "51150",
+          "51200",
+          "51250",
+          "51300",
+          "51350",
+          "51400",
+          "51450",
+          "51500",
+          "51550",
+          "51600",
+          "51650",
+          "51700",
+          "51750",
+          "51800",
+          "51850",
+          "51900",
+          "51950",
+          "52000",
+          "52050",
+          "52100",
+          "52150",
+          "52200",
+          "52250",
+          "52300",
+          "52350",
+          "52400",
+          "52450",
+          "52500",
+          "52550",
+          "52600",
+          "52650",
+          "52700",
+          "52750",
+          "52800",
+          "52850",
+          "52900",
+          "52950",
+          "53000",
+          "53050",
+          "53100",
+          "53150",
+          "53200",
+          "53250",
+          "53300",
+          "53350",
+          "53400",
+          "53450",
+          "53500",
+          "53550",
+          "53600",
+          "53650",
+          "53700",
+          "53750",
+          "53800",
+          "53850",
+          "53900",
+          "53950",
+          "54000",
+          "54050",
+          "54100",
+          "54150",
+          "54200",
+          "54250",
+          "54300",
+          "54350",
+          "54400",
+          "54450",
+          "54500",
+          "54550",
+          "54600",
+          "54650",
+          "54700",
+          "54750",
+          "54800",
+          "54850",
+          "54900",
+          "54950",
+          "55000",
+          "55050",
+          "55100",
+          "55150",
+          "55200",
+          "55250",
+          "55300",
+          "55350",
+          "55400",
+          "55450",
+          "55500",
+          "55550",
+          "55600",
+          "55650",
+          "55700",
+          "55750",
+          "55800",
+          "55850",
+          "55900",
+          "55950",
+          "56000",
+          "56050",
+          "56100",
+          "56150",
+          "56200",
+          "56250",
+          "56300",
+          "56350",
+          "56400",
+          "56450",
+          "56500",
+          "56550",
+          "56600",
+          "56650",
+          "56700",
+          "56750",
+          "56800",
+          "56850",
+          "56900",
+          "56950",
+          "57000",
+          "57050",
+          "57100",
+          "57150",
+          "57200",
+          "57250",
+          "57300",
+          "57350",
+          "57400",
+          "57450",
+          "57500",
+          "57550",
+          "57600",
+          "57650",
+          "57700",
+          "57750",
+          "57800",
+          "57850",
+          "57900",
+          "57950",
+          "58000",
+          "58050",
+          "58100",
+          "58150",
+          "58200",
+          "58250",
+          "58300",
+          "58350",
+          "58400",
+          "58450",
+          "58500",
+          "58550",
+          "58600",
+          "58650",
+          "58700",
+          "58750",
+          "58800",
+          "58850",
+          "58900",
+          "58950",
+          "59000",
+          "59050",
+          "59100",
+          "59150",
+          "59200",
+          "59250",
+          "59300",
+          "59350",
+          "59400",
+          "59450",
+          "59500",
+          "59550",
+          "59600",
+          "59650",
+          "59700",
+          "59750",
+          "59800",
+          "59850",
+          "59900",
+          "59950",
+          "60000"
+        ]
+      },
+      "district_postal_codes": {
+        "Kuala Lumpur": [
+          "50000",
+          "50050",
+          "50100",
+          "50150",
+          "50200",
+          "50250",
+          "50300",
+          "50350",
+          "50400",
+          "50450",
+          "50500",
+          "50550",
+          "50600",
+          "50650",
+          "50700",
+          "50750",
+          "50800",
+          "50850",
+          "50900",
+          "50950",
+          "51000",
+          "51050",
+          "51100",
+          "51150",
+          "51200",
+          "51250",
+          "51300",
+          "51350",
+          "51400",
+          "51450",
+          "51500",
+          "51550",
+          "51600",
+          "51650",
+          "51700",
+          "51750",
+          "51800",
+          "51850",
+          "51900",
+          "51950",
+          "52000",
+          "52050",
+          "52100",
+          "52150",
+          "52200",
+          "52250",
+          "52300",
+          "52350",
+          "52400",
+          "52450",
+          "52500",
+          "52550",
+          "52600",
+          "52650",
+          "52700",
+          "52750",
+          "52800",
+          "52850",
+          "52900",
+          "52950",
+          "53000",
+          "53050",
+          "53100",
+          "53150",
+          "53200",
+          "53250",
+          "53300",
+          "53350",
+          "53400",
+          "53450",
+          "53500",
+          "53550",
+          "53600",
+          "53650",
+          "53700",
+          "53750",
+          "53800",
+          "53850",
+          "53900",
+          "53950",
+          "54000",
+          "54050",
+          "54100",
+          "54150",
+          "54200",
+          "54250",
+          "54300",
+          "54350",
+          "54400",
+          "54450",
+          "54500",
+          "54550",
+          "54600",
+          "54650",
+          "54700",
+          "54750",
+          "54800",
+          "54850",
+          "54900",
+          "54950",
+          "55000",
+          "55050",
+          "55100",
+          "55150",
+          "55200",
+          "55250",
+          "55300",
+          "55350",
+          "55400",
+          "55450",
+          "55500",
+          "55550",
+          "55600",
+          "55650",
+          "55700",
+          "55750",
+          "55800",
+          "55850",
+          "55900",
+          "55950",
+          "56000",
+          "56050",
+          "56100",
+          "56150",
+          "56200",
+          "56250",
+          "56300",
+          "56350",
+          "56400",
+          "56450",
+          "56500",
+          "56550",
+          "56600",
+          "56650",
+          "56700",
+          "56750",
+          "56800",
+          "56850",
+          "56900",
+          "56950",
+          "57000",
+          "57050",
+          "57100",
+          "57150",
+          "57200",
+          "57250",
+          "57300",
+          "57350",
+          "57400",
+          "57450",
+          "57500",
+          "57550",
+          "57600",
+          "57650",
+          "57700",
+          "57750",
+          "57800",
+          "57850",
+          "57900",
+          "57950",
+          "58000",
+          "58050",
+          "58100",
+          "58150",
+          "58200",
+          "58250",
+          "58300",
+          "58350",
+          "58400",
+          "58450",
+          "58500",
+          "58550",
+          "58600",
+          "58650",
+          "58700",
+          "58750",
+          "58800",
+          "58850",
+          "58900",
+          "58950",
+          "59000",
+          "59050",
+          "59100",
+          "59150",
+          "59200",
+          "59250",
+          "59300",
+          "59350",
+          "59400",
+          "59450",
+          "59500",
+          "59550",
+          "59600",
+          "59650",
+          "59700",
+          "59750",
+          "59800",
+          "59850",
+          "59900",
+          "59950",
+          "60000"
+        ]
+      }
+    },
+    {
+      "name": "Federal Territory of Labuan",
+      "code": "LB",
+      "districts": [
+        "Labuan"
+      ],
+      "major_cities": [
+        "Labuan"
+      ],
+      "postal_code_range": {
+        "start": "87000",
+        "end": "87033"
+      },
+      "postal_codes": [
+        "87000",
+        "87033"
+      ],
+      "major_city_postal_codes": {
+        "Labuan": [
+          "87000",
+          "87010",
+          "87020",
+          "87030",
+          "87033"
+        ]
+      },
+      "district_postal_codes": {
+        "Labuan": [
+          "87000",
+          "87010",
+          "87020",
+          "87030",
+          "87033"
+        ]
+      }
+    },
+    {
+      "name": "Federal Territory of Putrajaya",
+      "code": "PJ",
+      "districts": [
+        "Putrajaya"
+      ],
+      "major_cities": [
+        "Putrajaya"
+      ],
+      "postal_code_range": {
+        "start": "62000",
+        "end": "62988"
+      },
+      "postal_codes": [
+        "62000",
+        "62300",
+        "62988"
+      ],
+      "major_city_postal_codes": {
+        "Putrajaya": [
+          "62000",
+          "62100",
+          "62200",
+          "62300",
+          "62400",
+          "62500",
+          "62600",
+          "62700",
+          "62800",
+          "62900",
+          "62988"
+        ]
+      },
+      "district_postal_codes": {
+        "Putrajaya": [
+          "62000",
+          "62100",
+          "62200",
+          "62300",
+          "62400",
+          "62500",
+          "62600",
+          "62700",
+          "62800",
+          "62900",
+          "62988"
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "last_updated": "2025-12-17",
+    "source": "Wikipedia - List of districts in Malaysia",
+    "total_states": 13,
+    "total_federal_territories": 3,
+    "total_districts": 163,
+    "notes": "Complete list of all Malaysian states, federal territories, and their districts sourced from Wikipedia. Includes all 13 states and 3 federal territories with their respective administrative districts.",
+    "postal_codes_included": true,
+    "postal_code_source": "Wikipedia and known ranges"
+  }
+}

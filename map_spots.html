@@ -3,576 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drone Spots Map - Malaysia</title>
+    <title>Drone Spots Map - Enhanced (Malaysia)</title>
     
-    <!-- Leaflet.js CSS is loaded via CDN link in head -->
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     
     <style>
+        /* Reset html and body margins to ensure header is at top */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-left {
-            flex: 1;
-        }
-        
-        .header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .header-info {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        
-        .view-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .view-btn {
-            padding: 0.5rem 1rem;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        
-        .view-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-        
-        .view-btn.active {
-            background: rgba(255,255,255,0.4);
-            border-color: white;
-        }
-        
-        .container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        
-        #leafletMapContainer {
-            flex: 1;
-            flex-shrink: 1;
-            min-width: 0;
-            height: 100%;
-            width: 100%;
-            position: relative;
-            z-index: 1;
-            /* Prevent page zoom when interacting with map zone */
-            touch-action: pan-x pan-y pinch-zoom;
-        }
-        
-        /* Leaflet marker styles */
-        .custom-marker-query,
-        .custom-marker-spot {
-            background: transparent !important;
-            border: none !important;
-        }
-        
-        .sidebar {
-            width: 350px;
-            min-width: 350px;
-            max-width: 350px;
-            background: #f8f9fa;
-            border-left: 1px solid #dee2e6;
-            overflow-y: auto;
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
             overflow-x: hidden;
-            padding: 1rem;
-            z-index: 1000;
-            flex-shrink: 0;
-            position: relative;
-            pointer-events: auto;
         }
         
-        #spotsList {
-            width: 100%;
-            min-width: 0;
-        }
-        
-        .spot-card {
-            width: 100%;
-            min-width: 0;
-            max-width: 100%;
+        /* White layer to cover any gap at top */
+        .header-white-layer {
+            position: fixed;
+            top: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
             background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 4px solid #667eea;
-            box-sizing: border-box;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            z-index: 49;
         }
         
-        .spot-card:hover {
-            transform: translateX(-4px);
+        /* Ensure nav is at the very top */
+        nav.border-4 {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 !important;
+            margin-top: 0 !important;
+            transform: translateY(0) !important;
+        }
+        
+        /* Custom styles for enhanced map */
+        .safety-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 600;
+        }
+        .safety-badge.high {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .safety-badge.medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .safety-badge.low {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .info-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.625rem;
+            font-weight: 500;
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .action-btn {
+            transition: all 0.2s ease;
+        }
+        .action-btn:hover {
+            background-color: #000;
+            color: #fff;
+            transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
-        
-        .spot-card.selected {
-            border-left-color: #28a745;
-            background: #f0fff4;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            transform: translateX(-2px);
+        .airport-circle {
+            stroke-dasharray: 5, 5;
+            animation: dash 20s linear infinite;
         }
-        
-        .spot-card.low-safety {
-            border-left-color: #dc3545;
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
         }
-        
-        .spot-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 0.5rem;
-        }
-        
-        .spot-name {
-            font-weight: 600;
-            color: #333;
-            font-size: 1rem;
-        }
-        
-        .safety-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .safety-high {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .safety-medium {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .safety-low {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .spot-details {
-            font-size: 0.85rem;
-            color: #666;
-            line-height: 1.6;
-        }
-        
-        .spot-details strong {
-            color: #333;
-        }
-        
-        .spot-type {
-            display: inline-block;
-            background: #e9ecef;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
-        }
-        
-        .no-fly-warning {
-            color: #dc3545;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            font-weight: 500;
-        }
-        
-        .input-section {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .input-section h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-        
-        .input-section textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            resize: vertical;
-        }
-        
-        .input-section button {
-            width: 100%;
-            padding: 0.75rem;
-            background: #667eea;
-            color: white;
+        .custom-marker-icon {
+            background: transparent;
             border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 0.5rem;
-            transition: background 0.2s;
         }
         
-        .input-section button:hover:not(:disabled) {
-            background: #5568d3;
+        /* Make markers more visible (droneDirectory style) */
+        .leaflet-marker-icon {
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+            transition: transform 0.2s ease;
         }
         
-        .input-section button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
+        .leaflet-marker-icon:hover {
+            transform: scale(1.15);
+            z-index: 1000 !important;
         }
         
-        .input-section input[type="search"],
-        .input-section input[type="text"] {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            box-sizing: border-box;
-        }
-        
-        .input-section input[type="search"]:focus,
-        .input-section input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
-        }
-        
-        .search-results-info {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-box {
-            background: white;
-            padding: 0.75rem;
-            border-radius: 6px;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 0.25rem;
-        }
-        
-        .elevation-info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.95);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            font-size: 0.85rem;
-            z-index: 1000;
-            pointer-events: none;
-        }
-        
-        .elevation-info strong {
-            color: #667eea;
-        }
-        
-        /* Tooltip for hover info */
-        .spot-tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            pointer-events: none;
-            z-index: 1000;
-            max-width: 250px;
-            display: none;
-        }
-        
-        .weather-card {
-            background: white;
+        /* Custom popup styling */
+        .custom-popup .leaflet-popup-content-wrapper {
             border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #28a745;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        .weather-card.warning {
-            border-left-color: #ffc107;
+        /* Improve marker cluster visibility (droneDirectory blue) */
+        .marker-cluster-small {
+            background-color: rgba(0, 71, 171, 0.6) !important;
+            color: white !important;
+        }
+        .marker-cluster-medium {
+            background-color: rgba(0, 71, 171, 0.7) !important;
+            color: white !important;
+        }
+        .marker-cluster-large {
+            background-color: rgba(0, 71, 171, 0.8) !important;
+            color: white !important;
         }
         
-        .weather-card.danger {
-            border-left-color: #dc3545;
-        }
-        
-        .weather-card-header {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-        
-        .weather-card-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-        
-        .weather-card-text {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 0.25rem;
-        }
-        
-        .no-fly-zone-info {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 0.75rem;
-            font-size: 0.85rem;
-        }
-        
-        .no-fly-zone-info.danger {
-            background: #f8d7da;
-            border-left-color: #dc3545;
-        }
-        
-        /* Safe area polygon styling */
-        .safe-area-polygon {
-            pointer-events: auto;
-        }
-        
-        .safe-area-info {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 0.75rem;
-            font-size: 0.85rem;
-        }
-        
-        .google-maps-link {
-            display: inline-block;
-            margin-top: 0.5rem;
-            padding: 0.4rem 0.75rem;
-            background: #4285f4;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        .google-maps-link:hover {
-            background: #357ae8;
-            color: white;
-            text-decoration: none;
-        }
-        
-        .google-maps-link:visited {
-            color: white;
+        .marker-cluster div {
+            background-color: transparent !important;
+            color: white !important;
+            font-weight: bold;
         }
     </style>
 </head>
-<body>
-    <div class="header">
-        <div class="header-left">
-            <h1>🗺️ Drone Spots Map - Malaysia</h1>
-            <div class="header-info">Interactive terrain map visualization of drone flying locations</div>
-        </div>
-        <div class="view-controls">
-            <button class="view-btn active" id="btnTerrain" onclick="switchToTerrainView()">Terrain</button>
-            <button class="view-btn" id="btnSatellite" onclick="switchToSatelliteView()">Satellite</button>
-            <button class="view-btn" id="btnStreet" onclick="switchToStreetView()">Street</button>
-            <button class="view-btn active" id="btnDistanceLines" onclick="toggleDistanceLines()">Distance Lines</button>
-        </div>
-    </div>
+<body class="bg-zinc-100">
+    <!-- White layer to cover any gap at top -->
+    <div class="header-white-layer"></div>
     
-    <div class="container">
-        <div id="leafletMapContainer" style="flex: 1; height: 100%; position: relative;"></div>
-        <div id="spotTooltip" class="spot-tooltip"></div>
-        <div class="sidebar">
-            <div class="input-section">
-                <h3>Search from API</h3>
-                <div style="margin-bottom: 0.5rem;">
-                    <input type="text" id="apiSearchInput" placeholder="Enter address or location (e.g., Kuala Lumpur)" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box;" />
-                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                        <input type="number" id="apiRadiusInput" placeholder="Radius (km)" value="15" min="1" max="50" step="1" style="flex: 1; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box;" />
-                        <button onclick="searchFromAPI()" id="apiSearchBtn" style="flex: 1; padding: 0.5rem; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Search API</button>
+    <!-- Enhanced Navigation Bar (inspired by droneDirectory) -->
+    <nav class="border-4 border-black bg-zinc-200 w-full fixed top-0 left-0 right-0 z-50" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; margin: 0 !important; margin-top: 0 !important;">
+        <div class="md:flex md:justify-between items-center p-3">
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <a href="#" class="text-xl font-semibold flex gap-2 items-center justify-center group">
+                    <span class="text-2xl">🚁</span>
+                    <span class="hidden md:inline">Drone Spots Malaysia</span>
+                </a>
+                <button id="mobileMenuBtn" class="text-3xl md:hidden">☰</button>
+            </div>
+            <div id="navMenu" class="hidden md:flex items-center gap-5">
+                <button id="btnClustering" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
+                    Toggle Clustering
+                </button>
+                <button id="btnAirports" class="px-4 py-2 border border-black rounded hover:border-gray-400">
+                    Toggle Airports
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="flex flex-col h-screen pt-16">
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Map Container -->
+            <div id="leafletMapContainer" class="flex-1 w-full h-full"></div>
+            
+            <!-- Enhanced Sidebar (collapsible, like droneDirectory) -->
+            <div id="sidebar" class="w-96 bg-white shadow-lg overflow-y-auto hidden md:block transition-all duration-300">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-2xl font-bold mb-2">Drone Spots Malaysia</h2>
+                    <p class="text-sm text-gray-600">Click markers to view details</p>
+                    <p class="text-xs text-gray-500 mt-1">📍 Map restricted to Malaysia (including Sabah & Sarawak)</p>
+                </div>
+                
+                <!-- Search Section -->
+                <div class="p-4 border-b border-gray-200">
+                    <div class="flex gap-2 mb-2">
+                        <input 
+                            type="text" 
+                            id="locationSearch" 
+                            placeholder="Enter location (e.g., Kuala Lumpur)" 
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button 
+                            id="searchBtn" 
+                            onclick="searchLocation()"
+                            class="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                        >
+                            Search
+                        </button>
                     </div>
-                    <div id="apiStatusMessage" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666; display: none; min-height: 1.2rem;"></div>
+                    <input 
+                        type="search" 
+                        id="searchInput" 
+                        placeholder="Filter loaded spots..." 
+                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        oninput="filterSpots()"
+                    />
+                    <div id="searchResultsInfo" class="mt-2 text-sm text-gray-600 hidden"></div>
                 </div>
                 
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
-                    <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Load JSON Data</h3>
-                    <textarea id="jsonInput" placeholder="Paste JSON response from API here, or leave empty to use sample data..." style="width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem; resize: vertical; box-sizing: border-box;"></textarea>
-                    <button onclick="loadMapData()" style="width: 100%; padding: 0.75rem; background: #667eea; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s;">Load & Display Spots</button>
-                    <div id="statusMessage" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666; display: none; min-height: 1.2rem;"></div>
+                <!-- Stats Section -->
+                <div id="stats" class="p-4 border-b border-gray-200 grid grid-cols-2 gap-4 hidden">
+                    <div class="bg-zinc-100 p-3 rounded">
+                        <div class="text-2xl font-bold" id="totalSpots">0</div>
+                        <div class="text-sm text-gray-600">Total Spots</div>
+                    </div>
+                    <div class="bg-zinc-100 p-3 rounded">
+                        <div class="text-2xl font-bold" id="avgSafety">0</div>
+                        <div class="text-sm text-gray-600">Avg Safety</div>
+                    </div>
                 </div>
                 
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
-                    <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Filter Loaded Spots</h3>
-                    <input type="search" id="searchInput" placeholder="Search by name, address, terrain, or safety score..." oninput="filterSpots()" />
-                    <div id="searchResultsInfo" class="search-results-info" style="display: none;"></div>
-                </div>
+                <!-- Spots List -->
+                <div id="spotsList" class="p-4"></div>
             </div>
-            
-            <div id="stats" class="stats" style="display: none;">
-                <div class="stat-box">
-                    <div class="stat-value" id="totalSpots">0</div>
-                    <div class="stat-label">Total Spots</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="avgSafety">0</div>
-                    <div class="stat-label">Avg Safety</div>
-                </div>
-            </div>
-            
-            <div id="spotsList"></div>
         </div>
     </div>
     
-    <!-- Leaflet map handles popups and tooltips -->
-    
-    <!-- Leaflet.js for map visualization (no API key required) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- Leaflet.js -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Leaflet MarkerCluster -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     
     <script>
         let leafletMap = null;
+        let markerCluster = null; // Marker cluster group
         let leafletMarkers = [];
-        let leafletPolylines = []; // Store distance lines
-        let showDistanceLines = true; // Toggle for distance lines visibility
-        let currentMapLayer = 'terrain'; // 'terrain', 'satellite', 'street'
+        let airportMarkers = [];
+        let airportCircles = [];
+        let showClustering = true;
+        let showAirports = true;
         let spotsData = null;
-        let allSpots = []; // Store all spots for filtering
-        let filteredSpots = []; // Currently displayed spots
-        let selectedSpotIndex = null;
-        let noFlyZonePolygons = []; // Store no-fly zone polygons
-        let mapLayers = {}; // Store different map layer types
+        let allSpots = [];
+        let filteredSpots = [];
+        let mapLayers = {};
+        let currentSearchAbortController = null; // For canceling ongoing searches
+        let isSearching = false; // Flag to prevent duplicate searches
+        let malaysiaData = null; // States and districts data
         
-        // API configuration - try to auto-detect or use default
+        // API configuration
         const API_BASE_URL = (() => {
-            // Try to detect API URL from current page location
             const hostname = window.location.hostname;
             const port = window.location.port || '8001';
-            // If accessing via API server (e.g., /map endpoint), use same origin
             if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
                 return `${window.location.protocol}//${hostname}:${port}`;
             }
-            // Default to localhost
             return 'http://localhost:8001';
         })();
         
-        // Sample data (empty - no pre-loaded spots)
-        const sampleData = {
-            "query_location": null,
-            "total_spots_found": 0,
-            "spots": [],
-            "search_radius_km": 15.0
-        };
-        
+        // Initialize map
         function initMap() {
-            // Check if Leaflet is available
             if (typeof L === 'undefined') {
                 console.error('Leaflet.js library not loaded!');
-                alert('Error: Leaflet.js map library failed to load. Please check your internet connection and refresh the page.');
+                alert('Error: Leaflet.js map library failed to load.');
                 return;
             }
             
-            // Initialize Leaflet map
-            const defaultCenter = [5.737, 100.417]; // Default to Malaysia
+            // Center point to show both Peninsular Malaysia and Borneo (Sabah & Sarawak)
+            const defaultCenter = [3.5, 110.0]; // Centered to show all of Malaysia
+            
+            // Malaysia boundaries (restrict map to Malaysia only, including Sabah & Sarawak)
+            const malaysiaBounds = [
+                [0.5, 99.0],   // Southwest corner (south, west) - includes southern Sarawak
+                [7.6, 119.5]   // Northeast corner (north, east) - includes northern Sabah
+            ];
             
             leafletMap = L.map('leafletMapContainer', {
                 center: defaultCenter,
-                zoom: 12,
-                // Enable scroll wheel zoom on map
-                scrollWheelZoom: true
+                zoom: 6, // Zoomed in to focus on Malaysia including Sabah & Sarawak
+                scrollWheelZoom: true,
+                wheelPxPerZoomLevel: 120, // Less sensitive zoom (default is 60, higher = less sensitive)
+                zoomSnap: 0.5, // Smoother zoom increments
+                zoomDelta: 1, // Zoom step size
+                maxBounds: malaysiaBounds, // Restrict panning to Malaysia (including Sabah & Sarawak)
+                maxBoundsViscosity: 1.0, // Prevent panning outside bounds
+                minZoom: 5, // Prevent zooming out beyond Malaysia bounds
+                maxZoom: 18 // Maximum zoom level
             });
             
-            // Prevent page zoom when mouse wheel is used on map zone
-            const mapContainer = document.getElementById('leafletMapContainer');
-            if (mapContainer) {
-                // Stop wheel events from propagating to page (but allow map zoom)
-                mapContainer.addEventListener('wheel', (e) => {
-                    // Only prevent page zoom if Ctrl/Cmd is NOT pressed
-                    // (Ctrl/Cmd + wheel should still allow browser zoom if user wants it)
-                    if (!e.ctrlKey && !e.metaKey) {
-                        // Stop propagation to prevent page zoom
-                        e.stopPropagation();
-                    }
-                }, { passive: true, capture: true });
-                
-                // Prevent touch zoom gestures from affecting page
-                mapContainer.addEventListener('touchmove', (e) => {
-                    // If it's a pinch gesture (2 touches), prevent page zoom
-                    if (e.touches.length === 2) {
-                        e.stopPropagation();
-                    }
-                }, { passive: true, capture: true });
-            }
+            // Set view bounds to Malaysia
+            leafletMap.setMaxBounds(malaysiaBounds);
             
-            // Create different map layers
+            // Create map layers
             mapLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
                 maxZoom: 17,
-                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 subdomains: ['a', 'b', 'c']
             });
             
@@ -583,12 +305,10 @@
             });
             
             mapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                attribution: 'Tiles &copy; Esri'
             });
             
-            // Add default terrain layer
-            mapLayers.terrain.addTo(leafletMap);
-            currentMapLayer = 'terrain';
+            mapLayers.satellite.addTo(leafletMap);
             
             // Add layer control
             L.control.layers({
@@ -597,1163 +317,776 @@
                 "Satellite": mapLayers.satellite
             }).addTo(leafletMap);
             
-            console.log('Leaflet map initialized');
+            // Initialize marker cluster group
+            markerCluster = L.markerClusterGroup({
+                chunkedLoading: true,
+                maxClusterRadius: 50
+            });
             
-            // Load initial data
-            loadMapData();
-        }
-        
-        function switchToTerrainView() {
-            if (!leafletMap || !mapLayers.terrain) return;
+            // Event handlers
+            document.getElementById('btnClustering').addEventListener('click', toggleClustering);
+            document.getElementById('btnAirports').addEventListener('click', toggleAirports);
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
             
-            // Remove current layer
-            leafletMap.eachLayer(layer => {
-                if (layer instanceof L.TileLayer) {
-                    leafletMap.removeLayer(layer);
+            // Enforce minimum zoom to prevent showing areas outside Malaysia
+            leafletMap.on('zoomend', () => {
+                const currentZoom = leafletMap.getZoom();
+                // If zoomed out too far, enforce minimum zoom
+                if (currentZoom < 5) {
+                    leafletMap.setZoom(5);
                 }
             });
             
-            // Add terrain layer
-            mapLayers.terrain.addTo(leafletMap);
-            currentMapLayer = 'terrain';
-            
-            // Update button states
-            document.getElementById('btnTerrain').classList.add('active');
-            document.getElementById('btnSatellite').classList.remove('active');
-            document.getElementById('btnStreet').classList.remove('active');
+            console.log('Enhanced map initialized with clustering support');
         }
         
-        function switchToSatelliteView() {
-            if (!leafletMap || !mapLayers.satellite) return;
-            
-            // Remove current layer
-            leafletMap.eachLayer(layer => {
-                if (layer instanceof L.TileLayer) {
-                    leafletMap.removeLayer(layer);
-                }
-            });
-            
-            // Add satellite layer
-            mapLayers.satellite.addTo(leafletMap);
-            currentMapLayer = 'satellite';
-            
-            // Update button states
-            document.getElementById('btnTerrain').classList.remove('active');
-            document.getElementById('btnSatellite').classList.add('active');
-            document.getElementById('btnStreet').classList.remove('active');
+        // Toggle marker clustering
+        function toggleClustering() {
+            showClustering = !showClustering;
+            updateMarkers();
+            document.getElementById('btnClustering').textContent = showClustering ? 'Disable Clustering' : 'Enable Clustering';
         }
         
-        function switchToStreetView() {
-            if (!leafletMap || !mapLayers.street) return;
-            
-            // Remove current layer
-            leafletMap.eachLayer(layer => {
-                if (layer instanceof L.TileLayer) {
-                    leafletMap.removeLayer(layer);
-                }
-            });
-            
-            // Add street layer
-            mapLayers.street.addTo(leafletMap);
-            currentMapLayer = 'street';
-            
-            // Update button states
-            document.getElementById('btnTerrain').classList.remove('active');
-            document.getElementById('btnSatellite').classList.remove('active');
-            document.getElementById('btnStreet').classList.add('active');
-        }
-        
-        function toggleDistanceLines() {
-            if (!leafletMap) return;
-            
-            showDistanceLines = !showDistanceLines;
-            const btn = document.getElementById('btnDistanceLines');
-            
-            // Toggle visibility of all polylines
-            leafletPolylines.forEach(polyline => {
-                if (showDistanceLines) {
-                    if (!leafletMap.hasLayer(polyline)) {
-                        polyline.addTo(leafletMap);
-                    }
-                } else {
-                    if (leafletMap.hasLayer(polyline)) {
-                        leafletMap.removeLayer(polyline);
-                    }
-                }
-            });
-            
-            // Update button state
-            if (showDistanceLines) {
-                btn.classList.add('active');
+        // Toggle airport display
+        function toggleAirports() {
+            showAirports = !showAirports;
+            if (showAirports) {
+                airportCircles.forEach(circle => circle.addTo(leafletMap));
+                airportMarkers.forEach(marker => marker.addTo(leafletMap));
             } else {
-                btn.classList.remove('active');
+                airportCircles.forEach(circle => leafletMap.removeLayer(circle));
+                airportMarkers.forEach(marker => leafletMap.removeLayer(marker));
             }
+            document.getElementById('btnAirports').textContent = showAirports ? 'Hide Airports' : 'Show Airports';
         }
         
-        function getSafetyClass(score) {
-            if (score >= 8) return 'safety-high';
-            if (score >= 5) return 'safety-medium';
-            return 'safety-low';
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('hidden');
         }
         
-        function getMarkerColor(score) {
-            // Return hex color strings for markers
-            if (score >= 8) return '#28a745'; // Green
-            if (score >= 5) return '#ffc107'; // Yellow
-            return '#dc3545'; // Red
-        }
-        
-        function getGoogleMapsLink(lat, lon) {
-            // Generate Google Maps link with coordinates
-            return `https://www.google.com/maps?q=${lat},${lon}`;
-        }
-        
-        function clearMap() {
-            // Clear Leaflet markers
-            if (leafletMap) {
-                leafletMarkers.forEach(marker => marker.remove());
-                leafletMarkers = [];
-            }
-        }
-        
-        // Make loadMapData globally accessible
-        window.loadMapData = function loadMapData() {
-            console.log('loadMapData called');
-            
-            const jsonInputElement = document.getElementById('jsonInput');
-            if (!jsonInputElement) {
-                alert('Error: JSON input textarea not found!');
-                console.error('jsonInput element not found');
-                return;
-            }
-            
-            // Check if textarea is disabled or readonly
-            if (jsonInputElement.disabled || jsonInputElement.readOnly) {
-                console.warn('Textarea is disabled or readonly');
-            }
-            
-            let jsonInput = jsonInputElement.value.trim();
-            console.log('JSON input length:', jsonInput.length);
-            let data;
-            
-            if (jsonInput) {
-                // Clean the input: remove common issues
-                // Remove shell prompts and terminal artifacts
-                jsonInput = jsonInput.replace(/arif@[^\$]*\$[\s]*$/gm, '');
-                jsonInput = jsonInput.replace(/^[^\{\[]*[\{\[]/, '{'); // Remove text before first { or [
-                jsonInput = jsonInput.replace(/[\}\]]\s*[^\}\]]*$/, '}'); // Remove text after last } or ]
-                
-                // Try to extract JSON if it's embedded in other text
-                // Look for JSON object/array boundaries
-                const jsonMatch = jsonInput.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-                if (jsonMatch) {
-                    jsonInput = jsonMatch[1];
-                }
-                
-                // Final trim
-                jsonInput = jsonInput.trim();
-                
-                try {
-                    data = JSON.parse(jsonInput);
-                    console.log('JSON parsed successfully:', data);
-                } catch (e) {
-                    // Try one more time with more aggressive cleaning
-                    try {
-                        // Remove everything before first { and after last }
-                        const firstBrace = jsonInput.indexOf('{');
-                        const lastBrace = jsonInput.lastIndexOf('}');
-                        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-                            jsonInput = jsonInput.substring(firstBrace, lastBrace + 1);
-                            data = JSON.parse(jsonInput);
-                            console.log('JSON parsed after cleaning:', data);
-                        } else {
-                            throw e;
-                        }
-                    } catch (e2) {
-                        alert('Invalid JSON! Please check your input.\n\nError: ' + e.message + '\n\nTip: Make sure you only paste the JSON data, not terminal prompts or other text.');
-                        console.error('JSON parse error:', e);
-                        console.error('Cleaned input:', jsonInput.substring(0, 200) + '...');
-                        return;
-                    }
-                }
-            } else {
-                data = sampleData;
-                console.log('Using sample data');
-            }
-            
-            // Validate data structure
-            if (!data || typeof data !== 'object') {
-                alert('Invalid data format! Expected an object with "spots" array.');
-                console.error('Invalid data:', data);
-                return;
-            }
-            
-            if (!data.spots || !Array.isArray(data.spots)) {
-                alert('Data does not contain a "spots" array!\n\nExpected format:\n{\n  "spots": [...],\n  "query_location": {...}\n}');
-                console.error('Missing spots array. Data structure:', Object.keys(data));
-                return;
-            }
-            
-            console.log(`Loading ${data.spots.length} spots`);
-            
-            // Show status message
-            const statusMsg = document.getElementById('statusMessage');
-            if (statusMsg) {
-                statusMsg.style.display = 'block';
-                statusMsg.style.color = '#666';
-                statusMsg.textContent = `Loading ${data.spots.length} spots...`;
-            }
-            
-            spotsData = data;
-            clearMap();
-            
-            try {
+        // Load and display spots
+        function loadMapData(data = null) {
+            if (data) {
+                spotsData = data;
                 displaySpots(data);
-                console.log('Map updated successfully');
-                
-                // Update status message
-                if (statusMsg) {
-                    statusMsg.style.color = '#28a745';
-                    statusMsg.textContent = `✓ Successfully loaded ${data.spots.length} spots`;
-                    setTimeout(() => {
-                        statusMsg.style.display = 'none';
-                    }, 3000);
-                }
-            } catch (e) {
-                const errorMsg = 'Error displaying spots on map!\nError: ' + e.message;
-                alert(errorMsg);
-                console.error('Display error:', e);
-                
-                // Update status message
-                if (statusMsg) {
-                    statusMsg.style.color = '#dc3545';
-                    statusMsg.textContent = '✗ Error: ' + e.message;
-                }
             }
-        };
+        }
         
+        // Display spots on map
         function displaySpots(data) {
-            if (!leafletMap) {
-                console.error('Map not initialized!');
-                alert('Map not initialized. Please refresh the page.');
+            // Clear existing markers
+            if (markerCluster) {
+                markerCluster.clearLayers();
+                leafletMap.removeLayer(markerCluster);
+            }
+            leafletMarkers = [];
+            
+            if (!data || !data.spots || data.spots.length === 0) {
+                console.log('No spots to display');
                 return;
             }
             
-            const spots = data.spots || [];
-            const queryLocation = data.query_location;
+            allSpots = data.spots;
+            filteredSpots = [...allSpots];
             
-            console.log(`Displaying ${spots.length} spots`);
+            // Create markers (droneDirectory style - camera icons)
+            data.spots.forEach((spot, index) => {
+                const marker = L.marker([spot.latitude, spot.longitude], {
+                    icon: createSpotIcon(spot),
+                    title: spot.name || 'Drone Spot' // Tooltip on hover
+                });
+                
+                // Add popup with better styling
+                const popupContent = createPopupContent(spot);
+                marker.bindPopup(popupContent, {
+                    className: 'custom-popup',
+                    maxWidth: 250,
+                    closeButton: true
+                });
+                
+                // Show popup on hover for better visibility (like droneDirectory)
+                marker.on('mouseover', function() {
+                    this.openPopup();
+                });
+                
+                // Zoom in when marker is clicked
+                marker.on('click', function() {
+                    const spotLatLng = [spot.latitude, spot.longitude];
+                    leafletMap.setView(spotLatLng, 15, {
+                        animate: true,
+                        duration: 0.5
+                    });
+                    this.openPopup();
+                });
+                
+                leafletMarkers.push(marker);
+            });
             
-            if (spots.length === 0) {
-                alert('No spots found in the data!');
-                return;
+            // Add markers to cluster or map
+            if (showClustering && markerCluster) {
+                leafletMarkers.forEach(marker => markerCluster.addLayer(marker));
+                markerCluster.addTo(leafletMap);
+            } else {
+                leafletMarkers.forEach(marker => marker.addTo(leafletMap));
             }
             
-            // Center map on query location
-            if (queryLocation) {
-                leafletMap.setView([queryLocation.latitude, queryLocation.longitude], 12);
+            // Fit map to bounds (but stay within Malaysia)
+            if (leafletMarkers.length > 0) {
+                const group = new L.featureGroup(leafletMarkers);
+                const markersBounds = group.getBounds();
+                
+                // Ensure bounds stay within Malaysia (including Sabah & Sarawak)
+                const malaysiaBounds = L.latLngBounds(
+                    [0.5, 99.0],   // Southwest (includes southern Sarawak)
+                    [7.6, 119.5]   // Northeast (includes northern Sabah)
+                );
+                
+                // Clip marker bounds to Malaysia bounds
+                const clippedBounds = L.latLngBounds(
+                    [
+                        Math.max(markersBounds.getSouth(), malaysiaBounds.getSouth()),
+                        Math.max(markersBounds.getWest(), malaysiaBounds.getWest())
+                    ],
+                    [
+                        Math.min(markersBounds.getNorth(), malaysiaBounds.getNorth()),
+                        Math.min(markersBounds.getEast(), malaysiaBounds.getEast())
+                    ]
+                );
+                
+                leafletMap.fitBounds(clippedBounds.pad(0.1), {
+                    maxZoom: 15, // Don't zoom in too much when fitting
+                    minZoom: 5 // Ensure we don't zoom out beyond Malaysia bounds
+                });
+            } else {
+                // If no markers, center on Malaysia (showing all including Sabah & Sarawak)
+                leafletMap.setView([3.5, 110.0], 6);
             }
             
-            // Add search radius circle
-            if (queryLocation && data.search_radius_km) {
-                addSearchRadiusCircle(queryLocation.latitude, queryLocation.longitude, data.search_radius_km);
+            // Load airports if query location exists
+            if (data.query_location) {
+                loadAirports(data.query_location.latitude, data.query_location.longitude, data.search_radius_km || 15);
             }
-            
-            // Load and display no-fly zones
-            if (queryLocation) {
-                loadNoFlyZones(queryLocation.latitude, queryLocation.longitude, data.search_radius_km || 15);
-            }
-            
-            // Display spots on Leaflet map
-            displaySpotsOnLeafletMap();
             
             // Update sidebar
-            updateSidebar(data);
+            updateSidebar();
         }
         
-        function addSearchRadiusCircle(centerLat, centerLon, radiusKm) {
-            if (!leafletMap || typeof L === 'undefined') return;
+        // Create custom spot icon (droneDirectory style - camera icon)
+        function createSpotIcon(spot) {
+            // Use droneDirectory's blue color (#0047AB) for all markers
+            const color = '#0047AB';
             
-            // Add search radius circle to Leaflet map
-            const circle = L.circle(
-                [centerLat, centerLon],
-                {
-                    radius: radiusKm * 1000, // Convert km to meters
-                    color: '#007bff',
-                    fillColor: '#007bff',
-                    fillOpacity: 0.2,
-                    weight: 2
-                }
-            ).addTo(leafletMap)
-            .bindPopup(`Search Radius: ${radiusKm} km`);
+            // Camera icon SVG (similar to droneDirectory)
+            const cameraIconSVG = `
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.293 4.293A1 1 0 0 1 9 4h6a1 1 0 0 1 .707.293L17.414 6H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2.586l1.707-1.707zM9.414 6L7.707 7.707A1 1 0 0 1 7 8H4v10h16V8h-3a1 1 0 0 1-.707-.293L14.586 6H9.414zM12 10.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-4 2a4 4 0 1 1 8 0 4 4 0 0 1-8 0z" 
+                          fill="${color}" 
+                          stroke="white" 
+                          stroke-width="1"/>
+                </svg>
+            `;
             
-            leafletMarkers.push(circle);
+            return L.divIcon({
+                className: 'custom-marker-icon',
+                html: `
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: white;
+                        border-radius: 50%;
+                        padding: 4px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        border: 2px solid white;
+                    ">
+                        ${cameraIconSVG}
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
         }
         
-        async function loadNoFlyZones(lat, lon, radiusKm) {
+        // Create popup content
+        function createPopupContent(spot) {
+            const safetyColor = spot.safety_score >= 8 ? '#28a745' : spot.safety_score >= 5 ? '#ffc107' : '#dc3545';
+            
+            // Generate Google Maps navigation URL (directions mode)
+            const mapsUrl = spot.google_maps_url || 
+                          `https://www.google.com/maps?q=${spot.latitude},${spot.longitude}`;
+            // Use directions URL for navigation (will open in navigation mode on mobile)
+            const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+            
+            return `
+                <div style="min-width: 200px;">
+                    <h3 style="font-weight: bold; margin-bottom: 5px;">${spot.name || 'Unnamed Spot'}</h3>
+                    <p style="margin: 5px 0; color: #666; font-size: 12px;">${spot.address || 'No address'}</p>
+                    <div style="margin: 8px 0;">
+                        <span style="background: ${safetyColor}; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px;">
+                            Safety: ${spot.safety_score?.toFixed(1) || 'N/A'}
+                        </span>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <a href="${navUrl}" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           style="
+                               display: inline-block;
+                               background-color: #4285F4;
+                               color: white;
+                               padding: 6px 12px;
+                               border-radius: 4px;
+                               text-decoration: none;
+                               font-size: 12px;
+                               font-weight: 500;
+                               transition: background-color 0.2s;
+                           "
+                           onmouseover="this.style.backgroundColor='#3367D6'"
+                           onmouseout="this.style.backgroundColor='#4285F4'"
+                        >
+                            🗺️ Navigate with Google Maps
+                        </a>
+                    </div>
+                    ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
+                        `<p style="color: #dc3545; margin-top: 8px; font-size: 12px;">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</p>` : ''}
+                </div>
+            `;
+        }
+        
+        // Load airports and display restrictions
+        async function loadAirports(lat, lon, radiusKm) {
             try {
                 const response = await fetch(`${API_BASE_URL}/no-fly-zones?latitude=${lat}&longitude=${lon}&radius_km=${radiusKm * 2}`);
                 const data = await response.json();
                 
-                const polygons = [];
+                // Debug: Log the API response structure
+                console.log('No-fly zones API response:', data);
                 
-                // Create circles for airports (5km radius)
-                data.no_fly_zones?.airports?.forEach(airport => {
-                    const circlePoints = [];
-                    const numPoints = 32;
-                    const radiusDeg = 5 / 111; // 5km radius
-                    
-                    for (let i = 0; i <= numPoints; i++) {
-                        const angle = (i / numPoints) * 2 * Math.PI;
-                        const aLat = airport.lat + radiusDeg * Math.cos(angle);
-                        const aLon = airport.lon + (radiusDeg / Math.cos(airport.lat * Math.PI / 180)) * Math.sin(angle);
-                        circlePoints.push([aLon, aLat]);
-                    }
-                    
-                    polygons.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: [circlePoints]
-                        },
-                        properties: {
-                            name: airport.name || 'Airport',
-                            color: 'rgba(255,0,0,0.4)',
-                            type: 'airport'
-                        }
-                    });
-                });
+                // Clear existing airports
+                airportCircles.forEach(circle => leafletMap.removeLayer(circle));
+                airportMarkers.forEach(marker => leafletMap.removeLayer(marker));
+                airportCircles = [];
+                airportMarkers = [];
                 
-                // Create circles for military areas (3km radius)
-                data.no_fly_zones?.military_areas?.forEach(military => {
-                    const circlePoints = [];
-                    const numPoints = 32;
-                    const radiusDeg = 3 / 111; // 3km radius
-                    
-                    for (let i = 0; i <= numPoints; i++) {
-                        const angle = (i / numPoints) * 2 * Math.PI;
-                        const mLat = military.lat + radiusDeg * Math.cos(angle);
-                        const mLon = military.lon + (radiusDeg / Math.cos(military.lat * Math.PI / 180)) * Math.sin(angle);
-                        circlePoints.push([mLon, mLat]);
-                    }
-                    
-                    polygons.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: [circlePoints]
-                        },
-                        properties: {
-                            name: military.name || 'Military Area',
-                            color: 'rgba(255,100,0,0.4)',
-                            type: 'military'
-                        }
-                    });
-                });
-                
-                noFlyZonePolygons = polygons;
-                
-                // Add to Leaflet map
-                if (leafletMap && typeof L !== 'undefined') {
-                    polygons.forEach(poly => {
-                        const coords = poly.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                // Get airports from the correct path in API response
+                const airports = data.no_fly_zones?.airports || [];
+                if (airports.length > 0) {
+                    airports.forEach(airport => {
+                        // Draw 5km radius circle
+                        const circle = L.circle([airport.lat, airport.lon], {
+                            radius: 5000, // 5km
+                            color: '#FF0000',
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.2,
+                            weight: 2,
+                            className: 'airport-circle'
+                        });
                         
-                        const polygon = L.polygon(coords, {
-                            color: poly.properties.color,
-                            fillColor: poly.properties.color,
-                            fillOpacity: 0.35,
-                            weight: 2
-                        }).addTo(leafletMap)
-                        .bindPopup(`<strong>${poly.properties.name}</strong><br>No-Fly Zone`);
+                        // Add airport marker
+                        const airportIcon = L.divIcon({
+                            className: 'custom-marker-icon',
+                            html: `<div style="
+                                background-color: #000;
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                border: 2px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                            "></div>`,
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        });
                         
-                        leafletMarkers.push(polygon);
+                        const marker = L.marker([airport.lat, airport.lon], {
+                            icon: airportIcon
+                        }).bindPopup(`<strong>${airport.name}</strong><br>Airport - 5km no-fly zone`);
+                        
+                        if (showAirports) {
+                            circle.addTo(leafletMap);
+                            marker.addTo(leafletMap);
+                        }
+                        
+                        airportCircles.push(circle);
+                        airportMarkers.push(marker);
                     });
                 }
+                
+                // Display military areas
+                const militaryAreas = data.no_fly_zones?.military_areas || [];
+                if (militaryAreas.length > 0) {
+                    militaryAreas.forEach(military => {
+                        // Draw 3km radius circle for military areas
+                        const circle = L.circle([military.lat, military.lon], {
+                            radius: 3000, // 3km
+                            color: '#FF6600',
+                            fillColor: '#FF6600',
+                            fillOpacity: 0.2,
+                            weight: 2,
+                            className: 'military-circle'
+                        });
+                        
+                        // Add military marker
+                        const militaryIcon = L.divIcon({
+                            className: 'custom-marker-icon',
+                            html: `<div style="
+                                background-color: #8B0000;
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                border: 2px solid white;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                            "></div>`,
+                            iconSize: [16, 16],
+                            iconAnchor: [8, 8]
+                        });
+                        
+                        const marker = L.marker([military.lat, military.lon], {
+                            icon: militaryIcon
+                        }).bindPopup(`<strong>${military.name}</strong><br>Military Area - 3km no-fly zone`);
+                        
+                        if (showAirports) {
+                            circle.addTo(leafletMap);
+                            marker.addTo(leafletMap);
+                        }
+                        
+                        airportCircles.push(circle);
+                        airportMarkers.push(marker);
+                    });
+                }
+                
+                console.log(`Loaded ${airports.length} airports and ${militaryAreas.length} military areas`);
             } catch (error) {
-                console.error('Error loading no-fly zones:', error);
+                console.error('Error loading airports:', error);
             }
         }
         
-        function displaySpotsOnLeafletMap() {
-            if (!leafletMap || !spotsData || typeof L === 'undefined') return;
+        // Focus on a spot when clicked from sidebar
+        function focusSpot(originalIndex, filteredIndex) {
+            const spot = filteredSpots[filteredIndex];
+            if (!spot || !leafletMap) return;
             
-            // Clear existing markers and polylines
-            leafletMarkers.forEach(marker => marker.remove());
-            leafletMarkers = [];
-            leafletPolylines.forEach(polyline => leafletMap.removeLayer(polyline));
-            leafletPolylines = [];
-            
-            // Add query location marker
-            if (spotsData.query_location) {
-                const queryIcon = L.divIcon({
-                    className: 'custom-marker-query',
-                    html: '<div style="background: #667eea; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7]
-                });
-                
-                const queryMarker = L.marker(
-                    [spotsData.query_location.latitude, spotsData.query_location.longitude],
-                    { icon: queryIcon }
-                ).addTo(leafletMap)
-                .bindPopup(`
-                    <div style="min-width: 200px;">
-                        <strong>Query Location</strong><br>Search center point<br>
-                        <a href="${getGoogleMapsLink(spotsData.query_location.latitude, spotsData.query_location.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
-                    </div>
-                `);
-                
-                leafletMarkers.push(queryMarker);
-            }
-            
-            // Add spot markers and safe area polygons
-            spotsData.spots.forEach(spot => {
-                const color = getMarkerColor(spot.safety_score);
-                const spotIcon = L.divIcon({
-                    className: 'custom-marker-spot',
-                    html: `<div style="background: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                });
-                
-                const marker = L.marker(
-                    [spot.latitude, spot.longitude],
-                    { icon: spotIcon }
-                ).addTo(leafletMap)
-                .bindPopup(`
-                    <div style="min-width: 200px;">
-                        <strong>${spot.name || 'Unnamed Location'}</strong><br>
-                        Safety: ${spot.safety_score}/10<br>
-                        Distance: ${spot.distance_km?.toFixed(2)} km<br>
-                        Elevation: ${spot.elevation_m || 'N/A'} m<br>
-                        ${spot.weather ? `Wind: ${spot.weather.wind_speed_ms || 'N/A'} m/s` : ''}
-                        ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
-                            `<br><span style="color: #dc3545;">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</span>` : ''}
-                        ${spot.safe_area_polygon ? `<br><span style="color: #28a745;">✓ Safe flying area: ${spot.safe_area_polygon.radius_m || 'N/A'}m radius</span>` : ''}
-                        <br><a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
-                    </div>
-                `);
-                
-                leafletMarkers.push(marker);
-                
-                // Draw distance line from query location to spot
-                if (spotsData.query_location) {
-                    const distanceLine = L.polyline(
-                        [
-                            [spotsData.query_location.latitude, spotsData.query_location.longitude],
-                            [spot.latitude, spot.longitude]
-                        ],
-                        {
-                            color: '#667eea',
-                            weight: 2,
-                            opacity: 0.6,
-                            dashArray: '5, 5' // Dashed line style
-                        }
-                    );
-                    
-                    // Add distance label in the middle of the line
-                    const midLat = (spotsData.query_location.latitude + spot.latitude) / 2;
-                    const midLon = (spotsData.query_location.longitude + spot.longitude) / 2;
-                    
-                    const distanceLabel = L.marker([midLat, midLon], {
-                        icon: L.divIcon({
-                            className: 'distance-label',
-                            html: `<div style="background: rgba(102, 126, 234, 0.85); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; white-space: nowrap; border: 1px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">${spot.distance_km?.toFixed(2) || 'N/A'} km</div>`,
-                            iconSize: [60, 20],
-                            iconAnchor: [30, 10]
-                        })
-                    });
-                    
-                    // Conditionally add to map based on toggle state
-                    if (showDistanceLines) {
-                        distanceLine.addTo(leafletMap);
-                        distanceLabel.addTo(leafletMap);
-                    }
-                    
-                    // Always store in array for toggle functionality
-                    leafletPolylines.push(distanceLine);
-                    leafletPolylines.push(distanceLabel);
-                }
-                
-                // Add safe area polygon if available
-                if (spot.safe_area_polygon && spot.safe_area_polygon.coordinates) {
-                    try {
-                        // Convert GeoJSON coordinates [lon, lat] to Leaflet format [lat, lon]
-                        const polygonCoords = spot.safe_area_polygon.coordinates[0].map(coord => [coord[1], coord[0]]);
-                        
-                        // Determine polygon color based on safety score
-                        let polygonColor = '#28a745'; // Green for high safety
-                        let polygonFillColor = '#28a745';
-                        if (spot.safety_score >= 9) {
-                            polygonColor = '#28a745'; // Bright green
-                            polygonFillColor = '#28a745';
-                        } else if (spot.safety_score >= 8) {
-                            polygonColor = '#5cb85c'; // Medium green
-                            polygonFillColor = '#5cb85c';
-                        } else {
-                            polygonColor = '#90ee90'; // Light green
-                            polygonFillColor = '#90ee90';
-                        }
-                        
-                        const safeAreaPolygon = L.polygon(polygonCoords, {
-                            color: polygonColor,
-                            fillColor: polygonFillColor,
-                            fillOpacity: 0.2,
-                            weight: 2,
-                            dashArray: '5, 5',
-                            className: 'safe-area-polygon'
-                        }).addTo(leafletMap)
-                        .bindPopup(`
-                            <div style="min-width: 200px;">
-                                <strong>🛡️ Safe Flying Area</strong><br>
-                                <strong>${spot.name || 'Unnamed Location'}</strong><br>
-                                Safety Score: ${spot.safety_score}/10<br>
-                                Radius: ${spot.safe_area_polygon.radius_m ? spot.safe_area_polygon.radius_m + 'm' : 'N/A'}<br>
-                                <span style="color: #28a745; font-size: 0.9em;">✓ Safe for drone operations</span>
-                            </div>
-                        `);
-                        
-                        leafletMarkers.push(safeAreaPolygon);
-                    } catch (error) {
-                        console.error('Error adding safe area polygon:', error, spot);
-                    }
-                }
+            // Zoom in to the spot (zoom level 15 for good detail)
+            const spotLatLng = [spot.latitude, spot.longitude];
+            leafletMap.setView(spotLatLng, 15, {
+                animate: true,
+                duration: 0.5
             });
             
-            // Add search radius circle if not already added
-            if (spotsData.query_location && spotsData.search_radius_km) {
-                const circle = L.circle(
-                    [spotsData.query_location.latitude, spotsData.query_location.longitude],
-                    {
-                        radius: spotsData.search_radius_km * 1000,
-                        color: '#007bff',
-                        fillColor: '#007bff',
-                        fillOpacity: 0.2,
-                        weight: 2
-                    }
-                ).addTo(leafletMap);
-                leafletMarkers.push(circle);
-            }
-            
-            // Fit bounds to show all markers
-            if (leafletMarkers.length > 0) {
-                const group = new L.featureGroup(leafletMarkers);
-                leafletMap.fitBounds(group.getBounds().pad(0.1));
-            }
-        }
-        
-        function filterSpots() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            const searchInfo = document.getElementById('searchResultsInfo');
-            
-            if (!spotsData || !spotsData.spots) {
-                return;
-            }
-            
-            if (!searchQuery) {
-                // Show all spots
-                filteredSpots = [...allSpots];
-                searchInfo.style.display = 'none';
-            } else {
-                // Filter spots based on search query
-                filteredSpots = allSpots.filter(spot => {
-                    const name = (spot.name || 'Unnamed Location').toLowerCase();
-                    const address = (spot.address || '').toLowerCase();
-                    const terrain = (spot.terrain_type || '').toLowerCase();
-                    const spotType = (spot.spot_type || '').toLowerCase();
-                    const safetyScore = spot.safety_score.toString();
-                    const distance = spot.distance_km ? spot.distance_km.toString() : '';
-                    const elevation = spot.elevation_m ? spot.elevation_m.toString() : '';
-                    
-                    return name.includes(searchQuery) ||
-                           address.includes(searchQuery) ||
-                           terrain.includes(searchQuery) ||
-                           spotType.includes(searchQuery) ||
-                           safetyScore.includes(searchQuery) ||
-                           distance.includes(searchQuery) ||
-                           elevation.includes(searchQuery);
-                });
-                
-                // Show search results info
-                searchInfo.style.display = 'block';
-                if (filteredSpots.length === 0) {
-                    searchInfo.textContent = `No spots found matching "${searchQuery}"`;
-                    searchInfo.style.color = '#dc3545';
-                } else {
-                    searchInfo.textContent = `Found ${filteredSpots.length} of ${allSpots.length} spots`;
-                    searchInfo.style.color = '#666';
-                }
-            }
-            
-            // Update sidebar display
-            displayFilteredSpots();
-            
-            // Update map markers visibility
-            updateMapMarkersVisibility();
-        }
-        
-        function displayFilteredSpots() {
-            const spotsList = document.getElementById('spotsList');
-            const stats = document.getElementById('stats');
-            
-            // Calculate stats from filtered spots
-            const totalSpots = filteredSpots.length;
-            const avgSafety = filteredSpots.length > 0 
-                ? (filteredSpots.reduce((sum, s) => sum + s.safety_score, 0) / filteredSpots.length).toFixed(1)
-                : 0;
-            
-            document.getElementById('totalSpots').textContent = totalSpots;
-            document.getElementById('avgSafety').textContent = avgSafety;
-            stats.style.display = 'grid';
-            
-            // Create spot cards for filtered spots
-            spotsList.innerHTML = filteredSpots.map((spot, displayIndex) => {
-                // Find original index in allSpots array
-                const originalIndex = allSpots.findIndex(s => 
-                    s.latitude === spot.latitude && 
-                    s.longitude === spot.longitude
-                );
-                const index = originalIndex !== -1 ? originalIndex : displayIndex;
-                
-                const safetyClass = getSafetyClass(spot.safety_score);
-                const isLowSafety = spot.safety_score < 5;
-                const cardClass = isLowSafety ? 'spot-card low-safety' : 'spot-card';
-                
-                // Create weather cards if available
-                let weatherCards = '';
-                if (spot.weather) {
-                    const weather = spot.weather;
-                    const windSpeed = weather.wind_speed_ms || 0;
-                    const windClass = windSpeed >= 5.5 ? 'danger' : (windSpeed >= 4.1 ? 'warning' : '');
-                    
-                    weatherCards = `
-                        <div class="weather-card ${windClass}">
-                            <div class="weather-card-header">Wind Speed</div>
-                            <div class="weather-card-value">${windSpeed.toFixed(1)} m/s</div>
-                            <div class="weather-card-text">${windSpeed >= 5.5 ? 'High wind - affects drone performance' : (windSpeed >= 4.1 ? 'Moderate wind' : 'Good conditions')}</div>
-                        </div>
-                    `;
-                    
-                    if (weather.temperature_c !== undefined) {
-                        const temp = weather.temperature_c;
-                        const tempClass = temp >= 35 || temp <= -10 ? 'danger' : (temp <= 0 ? 'warning' : '');
-                        weatherCards += `
-                            <div class="weather-card ${tempClass}">
-                                <div class="weather-card-header">Temperature</div>
-                                <div class="weather-card-value">${temp.toFixed(1)}°C</div>
-                                <div class="weather-card-text">${temp >= 35 || temp <= -10 ? 'Extreme temperature - affects battery' : 'Good for battery'}</div>
-                            </div>
-                        `;
-                    }
-                    
-                    if (weather.humidity !== undefined) {
-                        const humidity = weather.humidity;
-                        const humidityClass = humidity > 80 ? 'warning' : '';
-                        weatherCards += `
-                            <div class="weather-card ${humidityClass}">
-                                <div class="weather-card-header">Humidity</div>
-                                <div class="weather-card-value">${humidity}%</div>
-                                <div class="weather-card-text">${humidity > 80 ? 'High humidity' : 'Normal'}</div>
-                            </div>
-                        `;
-                    }
-                }
-                
-                // Create no-fly zone warning
-                let noFlyWarning = '';
-                if (spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0) {
-                    const warningClass = spot.safety_score < 5 ? 'danger' : '';
-                    noFlyWarning = `
-                        <div class="no-fly-zone-info ${warningClass}">
-                            <strong>⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</strong><br>
-                            ${spot.no_fly_zones_nearby.slice(0, 2).join('<br>')}
-                            ${spot.no_fly_zones_nearby.length > 2 ? `<br>...and ${spot.no_fly_zones_nearby.length - 2} more` : ''}
-                        </div>
-                    `;
-                }
-                
-                // Create safe area info
-                let safeAreaInfo = '';
-                if (spot.safe_area_polygon && spot.safe_area_polygon.radius_m) {
-                    safeAreaInfo = `
-                        <div class="safe-area-info">
-                            <strong>🛡️ Safe Flying Area</strong><br>
-                            Radius: ${spot.safe_area_polygon.radius_m}m<br>
-                            <span style="font-size: 0.8em; color: #155724;">This area is safe for drone operations</span>
-                        </div>
-                    `;
-                }
-                
-                return `
-                    <div class="${cardClass}" id="spot-${index}" data-spot-index="${index}" onclick="focusSpot(${index}); return false;">
-                        <div class="spot-header">
-                            <div class="spot-name">${spot.name || 'Unnamed Location'}</div>
-                            <span class="safety-badge ${safetyClass}">
-                                ${spot.safety_score}/10
-                            </span>
-                        </div>
-                        <div class="spot-details">
-                            <div><strong>Distance:</strong> ${spot.distance_km?.toFixed(2) || 'N/A'} km</div>
-                            <div><strong>Elevation:</strong> ${spot.elevation_m || 'N/A'} m</div>
-                            <div><strong>Terrain:</strong> ${spot.terrain_type || 'Unknown'}</div>
-                            <div><strong>Car Accessible:</strong> ${spot.car_accessible ? '✓ Yes' : '✗ No'}</div>
-                            ${safeAreaInfo}
-                            ${noFlyWarning}
-                            ${weatherCards}
-                            <div class="spot-type">${spot.spot_type?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}</div>
-                            <a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" class="google-maps-link" onclick="event.stopPropagation();">🗺️ Open in Google Maps</a>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Add event delegation as backup for click handling
-            // This ensures clicks work even if inline onclick fails
-            setTimeout(() => {
-                const spotsListContainer = document.getElementById('spotsList');
-                if (spotsListContainer && !spotsListContainer.hasAttribute('data-delegation-added')) {
-                    spotsListContainer.setAttribute('data-delegation-added', 'true');
-                    spotsListContainer.addEventListener('click', (e) => {
-                        const card = e.target.closest('.spot-card');
-                        if (card) {
-                            const indexAttr = card.getAttribute('data-spot-index');
-                            const idAttr = card.id;
-                            let index = null;
-                            
-                            if (indexAttr) {
-                                index = parseInt(indexAttr);
-                            } else if (idAttr && idAttr.startsWith('spot-')) {
-                                index = parseInt(idAttr.replace('spot-', ''));
-                            }
-                            
-                            if (!isNaN(index) && index !== null) {
-                                console.log('Event delegation: clicking spot index', index);
-                                e.preventDefault();
-                                e.stopPropagation();
-                                focusSpot(index);
-                            }
-                        }
-                    }, true); // Use capture phase to catch before inline handlers
-                }
-            }, 0);
-        }
-        
-        function updateMapMarkersVisibility() {
-            // Update Leaflet markers based on filter
-            if (!leafletMap) return;
-            
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            
-            // Clear all spot markers and polylines (keep query location, circles, and polygons)
-            const markersToRemove = [];
-            leafletMarkers.forEach((marker, index) => {
-                // Only remove markers that are actual spot markers
-                if (marker instanceof L.Marker && marker.options && marker.options.spotIndex !== undefined) {
-                    const spotIndex = marker.options.spotIndex;
-                    if (spotIndex >= 0) {
-                        markersToRemove.push(index);
-                    }
-                }
+            // Open popup on the marker if it exists
+            const marker = leafletMarkers.find(m => {
+                const latLng = m.getLatLng();
+                return Math.abs(latLng.lat - spot.latitude) < 0.0001 && 
+                       Math.abs(latLng.lng - spot.longitude) < 0.0001;
             });
-            
-            // Remove markers in reverse order to maintain indices
-            markersToRemove.reverse().forEach(index => {
-                leafletMarkers[index].remove();
-                leafletMarkers.splice(index, 1);
-            });
-            
-            // Clear all polylines
-            leafletPolylines.forEach(polyline => leafletMap.removeLayer(polyline));
-            leafletPolylines = [];
-            
-            // Re-add markers based on filter
-            const spotsToShow = searchQuery ? filteredSpots : allSpots;
-            
-            spotsToShow.forEach(spot => {
-                const color = getMarkerColor(spot.safety_score);
-                const spotIcon = L.divIcon({
-                    className: 'custom-marker-spot',
-                    html: `<div style="background: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                });
-                
-                const marker = L.marker(
-                    [spot.latitude, spot.longitude],
-                    { 
-                        icon: spotIcon,
-                        spotIndex: allSpots.indexOf(spot)
-                    }
-                ).addTo(leafletMap)
-                .bindPopup(`
-                    <div style="min-width: 200px;">
-                        <strong>${spot.name || 'Unnamed Location'}</strong><br>
-                        Safety: ${spot.safety_score}/10<br>
-                        Distance: ${spot.distance_km?.toFixed(2)} km<br>
-                        Elevation: ${spot.elevation_m || 'N/A'} m<br>
-                        ${spot.weather ? `Wind: ${spot.weather.wind_speed_ms || 'N/A'} m/s` : ''}
-                        ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
-                            `<br><span style="color: #dc3545;">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</span>` : ''}
-                        ${spot.safe_area_polygon ? `<br><span style="color: #28a745;">✓ Safe flying area: ${spot.safe_area_polygon.radius_m || 'N/A'}m radius</span>` : ''}
-                        <br><a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
-                    </div>
-                `);
-                
-                leafletMarkers.push(marker);
-                
-                // Draw distance line from query location to spot
-                if (spotsData && spotsData.query_location) {
-                    const distanceLine = L.polyline(
-                        [
-                            [spotsData.query_location.latitude, spotsData.query_location.longitude],
-                            [spot.latitude, spot.longitude]
-                        ],
-                        {
-                            color: '#667eea',
-                            weight: 2,
-                            opacity: 0.6,
-                            dashArray: '5, 5' // Dashed line style
-                        }
-                    );
-                    
-                    // Add distance label in the middle of the line
-                    const midLat = (spotsData.query_location.latitude + spot.latitude) / 2;
-                    const midLon = (spotsData.query_location.longitude + spot.longitude) / 2;
-                    
-                    const distanceLabel = L.marker([midLat, midLon], {
-                        icon: L.divIcon({
-                            className: 'distance-label',
-                            html: `<div style="background: rgba(102, 126, 234, 0.85); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; white-space: nowrap; border: 1px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">${spot.distance_km?.toFixed(2) || 'N/A'} km</div>`,
-                            iconSize: [60, 20],
-                            iconAnchor: [30, 10]
-                        })
-                    });
-                    
-                    // Conditionally add to map based on toggle state
-                    if (showDistanceLines) {
-                        distanceLine.addTo(leafletMap);
-                        distanceLabel.addTo(leafletMap);
-                    }
-                    
-                    // Always store in array for toggle functionality
-                    leafletPolylines.push(distanceLine);
-                    leafletPolylines.push(distanceLabel);
-                }
-                
-                // Re-add safe area polygon if available
-                if (spot.safe_area_polygon && spot.safe_area_polygon.coordinates) {
-                    try {
-                        const polygonCoords = spot.safe_area_polygon.coordinates[0].map(coord => [coord[1], coord[0]]);
-                        
-                        let polygonColor = '#28a745';
-                        let polygonFillColor = '#28a745';
-                        if (spot.safety_score >= 9) {
-                            polygonColor = '#28a745';
-                            polygonFillColor = '#28a745';
-                        } else if (spot.safety_score >= 8) {
-                            polygonColor = '#5cb85c';
-                            polygonFillColor = '#5cb85c';
-                        } else {
-                            polygonColor = '#90ee90';
-                            polygonFillColor = '#90ee90';
-                        }
-                        
-                        const safeAreaPolygon = L.polygon(polygonCoords, {
-                            color: polygonColor,
-                            fillColor: polygonFillColor,
-                            fillOpacity: 0.2,
-                            weight: 2,
-                            dashArray: '5, 5',
-                            className: 'safe-area-polygon'
-                        }).addTo(leafletMap)
-                        .bindPopup(`
-                            <div style="min-width: 200px;">
-                                <strong>🛡️ Safe Flying Area</strong><br>
-                                <strong>${spot.name || 'Unnamed Location'}</strong><br>
-                                Safety Score: ${spot.safety_score}/10<br>
-                                Radius: ${spot.safe_area_polygon.radius_m ? spot.safe_area_polygon.radius_m + 'm' : 'N/A'}<br>
-                                <span style="color: #28a745; font-size: 0.9em;">✓ Safe for drone operations</span>
-                            </div>
-                        `);
-                        
-                        leafletMarkers.push(safeAreaPolygon);
-                    } catch (error) {
-                        console.error('Error adding safe area polygon:', error, spot);
-                    }
-                }
-            });
-        }
-        
-        function updateSidebar(data) {
-            const spots = data.spots || [];
-            const spotsList = document.getElementById('spotsList');
-            const stats = document.getElementById('stats');
-            
-            // Store all spots for filtering
-            allSpots = [...spots];
-            filteredSpots = [...spots];
-            
-            // Clear search input
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResultsInfo').style.display = 'none';
-            
-            // Calculate stats
-            const totalSpots = spots.length;
-            const avgSafety = spots.length > 0 
-                ? (spots.reduce((sum, s) => sum + s.safety_score, 0) / spots.length).toFixed(1)
-                : 0;
-            
-            document.getElementById('totalSpots').textContent = totalSpots;
-            document.getElementById('avgSafety').textContent = avgSafety;
-            stats.style.display = 'grid';
-            
-            // Display all spots initially
-            displayFilteredSpots();
+            if (marker) {
+                marker.openPopup();
+            }
         }
         
         // Make focusSpot globally accessible
-        window.focusSpot = function focusSpot(index) {
-            console.log('focusSpot called with index:', index);
-            
-            if (!leafletMap) {
-                console.error('Map not initialized');
-                alert('Map not initialized. Please refresh the page.');
-                return;
+        window.focusSpot = focusSpot;
+        
+        // Update markers (for clustering toggle)
+        function updateMarkers() {
+            if (markerCluster) {
+                markerCluster.clearLayers();
+                leafletMap.removeLayer(markerCluster);
             }
             
-            if (!spotsData || !allSpots || allSpots.length === 0) {
-                console.error('No spots data available. spotsData:', spotsData, 'allSpots:', allSpots);
-                alert('No spots loaded. Please load spots first.');
-                return;
-            }
-            
-            if (index < 0 || index >= allSpots.length) {
-                console.error('Invalid spot index:', index, 'Total spots:', allSpots.length);
-                alert(`Invalid spot index: ${index}. Valid range: 0-${allSpots.length - 1}`);
-                return;
-            }
-            
-            const spot = allSpots[index];
-            console.log('Focusing on spot at index', index, ':', spot);
-            
-            // Validate coordinates
-            const lat = parseFloat(spot.latitude);
-            const lng = parseFloat(spot.longitude);
-            
-            if (isNaN(lat) || isNaN(lng)) {
-                console.error('Invalid coordinates:', { latitude: spot.latitude, longitude: spot.longitude });
-                alert('Spot location data is invalid: coordinates are not numbers');
-                return;
-            }
-            
-            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-                console.error('Coordinates out of range:', { lat, lng });
-                alert('Spot location data is invalid: coordinates out of valid range');
-                return;
-            }
-            
-            try {
-                // Fly to spot using Leaflet
-                leafletMap.setView([lat, lng], 15, {
-                    animate: true,
-                    duration: 1.0
-                });
-                
-                // Open popup for the marker if it exists
-                leafletMarkers.forEach(marker => {
-                    if (marker instanceof L.Marker) {
-                        const markerPos = marker.getLatLng();
-                        if (Math.abs(markerPos.lat - lat) < 0.0001 && Math.abs(markerPos.lng - lng) < 0.0001) {
-                            marker.openPopup();
-                        }
-                    }
-                });
-                
-                console.log('✓ Map focused on spot:', { lat, lng });
-                
-            } catch (error) {
-                console.error('Error focusing on location:', error);
-                alert('Error focusing on location: ' + error.message);
-                return;
-            }
-            
-            // Highlight card in sidebar
-            document.querySelectorAll('.spot-card').forEach(card => {
-                card.classList.remove('selected');
+            leafletMarkers.forEach(marker => {
+                if (leafletMap.hasLayer(marker)) {
+                    leafletMap.removeLayer(marker);
+                }
             });
             
-            const card = document.getElementById(`spot-${index}`);
-            if (card) {
-                card.classList.add('selected');
-                // Scroll card into view
-                setTimeout(() => {
-                    card.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center',
-                        inline: 'nearest'
-                    });
-                }, 100);
-                selectedSpotIndex = index;
-                console.log('Card highlighted and scrolled:', card.id);
+            if (showClustering && markerCluster) {
+                leafletMarkers.forEach(marker => markerCluster.addLayer(marker));
+                markerCluster.addTo(leafletMap);
+            } else {
+                leafletMarkers.forEach(marker => marker.addTo(leafletMap));
             }
         }
         
-        async function searchFromAPI() {
-            const searchInput = document.getElementById('apiSearchInput');
-            const radiusInput = document.getElementById('apiRadiusInput');
-            const searchBtn = document.getElementById('apiSearchBtn');
-            const statusMsg = document.getElementById('apiStatusMessage');
+        // Filter spots
+        function filterSpots() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            filteredSpots = allSpots.filter(spot => {
+                const name = (spot.name || '').toLowerCase();
+                const address = (spot.address || '').toLowerCase();
+                const terrain = (spot.terrain_type || '').toLowerCase();
+                return name.includes(query) || address.includes(query) || terrain.includes(query);
+            });
             
-            const address = searchInput.value.trim();
-            const radius = parseFloat(radiusInput.value) || 15.0;
+            updateSidebar();
+            updateMapMarkers();
+        }
+        
+        // Update sidebar
+        function updateSidebar() {
+            const listEl = document.getElementById('spotsList');
+            const statsEl = document.getElementById('stats');
+            const totalEl = document.getElementById('totalSpots');
+            const avgEl = document.getElementById('avgSafety');
             
-            if (!address) {
-                statusMsg.style.display = 'block';
-                statusMsg.style.color = '#dc3545';
-                statusMsg.textContent = 'Please enter an address or location name';
+            if (filteredSpots.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-500 text-center p-4">No spots found</p>';
+                statsEl.classList.add('hidden');
                 return;
             }
             
-            // Disable button and show loading
+            // Calculate stats
+            const avgSafety = filteredSpots.reduce((sum, spot) => sum + (spot.safety_score || 0), 0) / filteredSpots.length;
+            totalEl.textContent = filteredSpots.length;
+            avgEl.textContent = avgSafety.toFixed(1);
+            statsEl.classList.remove('hidden');
+            
+            // Render spots
+            listEl.innerHTML = filteredSpots.map((spot, index) => {
+                const safetyColor = spot.safety_score >= 8 ? 'bg-green-100 text-green-800' : 
+                                   spot.safety_score >= 5 ? 'bg-yellow-100 text-yellow-800' : 
+                                   'bg-red-100 text-red-800';
+                
+                // Generate Google Maps navigation URL
+                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${spot.latitude},${spot.longitude}`;
+                
+                return `
+                    <div class="mb-4 p-4 border border-gray-200 rounded-lg hover:shadow-md">
+                        <div class="cursor-pointer" onclick="focusSpot(${index}, ${index})">
+                            <h3 class="font-bold text-lg mb-2">${spot.name || 'Unnamed Spot'}</h3>
+                            <p class="text-sm text-gray-600 mb-2">${spot.address || 'No address'}</p>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="px-2 py-1 rounded text-xs ${safetyColor}">
+                                    Safety: ${spot.safety_score?.toFixed(1) || 'N/A'}
+                                </span>
+                                <span class="text-xs text-gray-500">${spot.distance_km?.toFixed(1) || 'N/A'} km</span>
+                            </div>
+                            ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
+                                `<p class="text-xs text-red-600 mb-2">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</p>` : ''}
+                        </div>
+                        <a href="${navUrl}" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="inline-block w-full text-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                           onclick="event.stopPropagation();"
+                        >
+                            🗺️ Navigate with Google Maps
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Update map markers based on filtered spots
+        function updateMapMarkers() {
+            // Remove all markers
+            if (markerCluster) {
+                markerCluster.clearLayers();
+                leafletMap.removeLayer(markerCluster);
+            }
+            leafletMarkers.forEach(marker => {
+                if (leafletMap.hasLayer(marker)) {
+                    leafletMap.removeLayer(marker);
+                }
+            });
+            
+            // Add filtered markers
+            const filteredMarkers = leafletMarkers.filter((marker, index) => {
+                return filteredSpots.some(spot => 
+                    Math.abs(spot.latitude - marker.getLatLng().lat) < 0.0001 &&
+                    Math.abs(spot.longitude - marker.getLatLng().lng) < 0.0001
+                );
+            });
+            
+            if (showClustering && markerCluster) {
+                filteredMarkers.forEach(marker => markerCluster.addLayer(marker));
+                markerCluster.addTo(leafletMap);
+            } else {
+                filteredMarkers.forEach(marker => marker.addTo(leafletMap));
+            }
+        }
+        
+        // Search location and load spots (Malaysia only)
+        async function searchLocation() {
+            // Prevent duplicate searches
+            if (isSearching) {
+                console.log('Search already in progress, ignoring duplicate request');
+                return;
+            }
+            
+            const locationInput = document.getElementById('locationSearch');
+            const location = locationInput.value.trim();
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!location) {
+                alert('Please enter a location in Malaysia (e.g., "Kuala Lumpur", "Penang", "Kota Kinabalu", "Kuching")');
+                return;
+            }
+            
+            // Cancel any ongoing search
+            if (currentSearchAbortController) {
+                currentSearchAbortController.abort();
+            }
+            
+            // Create new abort controller for this search
+            currentSearchAbortController = new AbortController();
+            const signal = currentSearchAbortController.signal;
+            
+            // Set searching flag
+            isSearching = true;
             searchBtn.disabled = true;
             searchBtn.textContent = 'Searching...';
-            statusMsg.style.display = 'block';
-            statusMsg.style.color = '#666';
-            statusMsg.textContent = `Searching for spots near "${address}"...`;
+            
+            // Clear previous results and error messages immediately
+            allSpots = [];
+            filteredSpots = [];
+            spotsData = null;
+            
+            // Clear existing markers before starting new search
+            if (markerCluster) {
+                markerCluster.clearLayers();
+                leafletMap.removeLayer(markerCluster);
+            }
+            leafletMarkers.forEach(marker => {
+                if (leafletMap.hasLayer(marker)) {
+                    leafletMap.removeLayer(marker);
+                }
+            });
+            leafletMarkers = [];
+            
+            // Update sidebar to show empty state
+            updateSidebar();
             
             try {
-                const url = `${API_BASE_URL}/search`;
-                const params = new URLSearchParams({
-                    address: address,
-                    radius_km: radius.toString()
-                });
+                // Improve search query formatting using states/districts data
+                let searchQuery = location.trim();
+                let stateParam = null;
+                let districtParam = null;
                 
-                console.log(`Fetching from API: ${url}?${params}`);
-                
-                const response = await fetch(`${url}?${params}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
+                // Try to find state/district info if we have the data
+                if (malaysiaData) {
+                    const locationInfo = findLocationInfo(searchQuery);
+                    if (locationInfo) {
+                        stateParam = locationInfo.state;
+                        districtParam = locationInfo.district;
+                        
+                        // Build better search query
+                        if (districtParam) {
+                            searchQuery = `${searchQuery}, ${stateParam}, Malaysia`;
+                        } else if (stateParam) {
+                            // If it's a state name, use state parameter instead
+                            if (stateParam.toLowerCase() === searchQuery.toLowerCase()) {
+                                // User searched for state name, use state parameter
+                                stateParam = stateParam;
+                                searchQuery = null; // Will use state parameter
+                            } else {
+                                searchQuery = `${searchQuery}, ${stateParam}, Malaysia`;
+                            }
+                        }
                     }
+                }
+                
+                // If location doesn't already include Malaysia, add it
+                if (searchQuery && !searchQuery.toLowerCase().includes('malaysia')) {
+                    searchQuery = `${searchQuery}, Malaysia`;
+                }
+                
+                // Build API URL with parameters
+                let apiUrl = `${API_BASE_URL}/search?radius_km=20&max_results=50`;
+                
+                if (stateParam && !searchQuery) {
+                    // Search by state only
+                    apiUrl += `&state=${encodeURIComponent(stateParam)}`;
+                } else if (searchQuery) {
+                    // Search by address
+                    apiUrl += `&address=${encodeURIComponent(searchQuery)}`;
+                    if (stateParam) {
+                        apiUrl += `&state=${encodeURIComponent(stateParam)}`;
+                    }
+                    if (districtParam) {
+                        apiUrl += `&district=${encodeURIComponent(districtParam)}`;
+                    }
+                }
+                
+                const response = await fetch(apiUrl, {
+                    signal: signal // Add abort signal
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+                    throw new Error(`API error: ${response.status}`);
                 }
                 
                 const data = await response.json();
                 
-                console.log('API response received:', data);
+                // Debug: Log the API response
+                console.log('API Response:', {
+                    hasSpots: !!data.spots,
+                    spotsLength: data.spots?.length || 0,
+                    totalSpotsFound: data.total_spots_found || 0,
+                    queryLocation: data.query_location,
+                    searchRadius: data.search_radius_km
+                });
                 
-                if (!data || !data.spots || !Array.isArray(data.spots)) {
-                    throw new Error('Invalid response format from API');
+                // Check if request was aborted after fetch completes
+                if (signal.aborted) {
+                    console.log('Search was cancelled after data received');
+                    return;
                 }
                 
-                // Update status
-                statusMsg.style.color = '#28a745';
-                statusMsg.textContent = `✓ Found ${data.spots.length} spots! Loading on map...`;
-                
-                // Load the data into the map
-                spotsData = data;
-                clearMap();
-                displaySpots(data);
-                
-                // Update JSON input with the response (for reference)
-                document.getElementById('jsonInput').value = JSON.stringify(data, null, 2);
-                
-                // Clear filter search
-                document.getElementById('searchInput').value = '';
-                document.getElementById('searchResultsInfo').style.display = 'none';
-                
-                // Hide status after 3 seconds
-                setTimeout(() => {
-                    statusMsg.style.display = 'none';
-                }, 3000);
-                
+                // Process results only if request wasn't aborted
+                if (data.spots && data.spots.length > 0) {
+                    // Filter spots to ensure they're within Malaysia bounds (including Sabah & Sarawak)
+                    const malaysiaBounds = L.latLngBounds([0.5, 99.0], [7.6, 119.5]);
+                    const validSpots = data.spots.filter(spot => {
+                        const lat = spot.latitude;
+                        const lon = spot.longitude;
+                        return lat >= 0.5 && lat <= 7.6 && lon >= 99.0 && lon <= 119.5;
+                    });
+                    
+                    // Check again if request was aborted after filtering
+                    if (signal.aborted) {
+                        console.log('Search was cancelled after filtering');
+                        return;
+                    }
+                    
+                    if (validSpots.length > 0) {
+                        data.spots = validSpots;
+                        data.total_spots_found = validSpots.length;
+                        loadMapData(data);
+                        locationInput.value = '';
+                        console.log(`Found ${validSpots.length} drone spots in Malaysia!`);
+                    } else {
+                        // Only show error after all processing is complete and request wasn't aborted
+                        alert('No valid spots found within Malaysia. Please search for a location in Malaysia (including Sabah & Sarawak).');
+                    }
+                } else {
+                    // Only show error after all processing is complete
+                    // Provide more helpful error message with debugging info
+                    const originalLocation = location.trim();
+                    
+                    // Try to suggest state/district format if we have the data
+                    let suggestion = '';
+                    if (malaysiaData) {
+                        const locationInfo = findLocationInfo(originalLocation);
+                        if (locationInfo && locationInfo.state && !originalLocation.toLowerCase().includes(locationInfo.state.toLowerCase())) {
+                            suggestion = `\n- Try: "${originalLocation}, ${locationInfo.state}"`;
+                        }
+                    }
+                    
+                    const errorMsg = data.total_spots_found === 0 
+                        ? `No spots found for "${originalLocation}". The API searched but found no suitable drone spots in the area.\n\nTry:\n- A larger city or well-known location (e.g., "Kuala Lumpur", "Penang", "Johor Bahru")${suggestion}\n- Adding the state name (e.g., "Kulim, Kedah")\n- A different location in Malaysia\n- Increasing the search radius`
+                        : `No spots found for "${originalLocation}". Please try a different location in Malaysia (including Sabah & Sarawak).${suggestion}`;
+                    console.warn('No spots in response:', data);
+                    console.log('Search query used:', searchQuery || 'State/District search');
+                    if (stateParam) console.log('State parameter:', stateParam);
+                    if (districtParam) console.log('District parameter:', districtParam);
+                    alert(errorMsg);
+                }
             } catch (error) {
-                console.error('API search error:', error);
-                statusMsg.style.color = '#dc3545';
-                statusMsg.textContent = `✗ Error: ${error.message}`;
-                
-                // Show helpful error message
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    statusMsg.textContent += `\n\nAPI might not be running at ${API_BASE_URL}\nTry: python3 drone_spots_api.py or ./start_api_ubuntu.sh`;
+                // Don't show error for aborted requests
+                if (error.name === 'AbortError' || signal.aborted) {
+                    console.log('Search was aborted');
+                    return; // Return early, finally block will still execute
                 }
+                
+                // Only show error if request wasn't aborted
+                console.error('Search error:', error);
+                alert(`Error searching: ${error.message}\n\nMake sure the API is running at ${API_BASE_URL}\n\nNote: This map only shows locations in Malaysia (including Sabah & Sarawak).`);
             } finally {
-                // Re-enable button
+                // Always reset button state, but only clear abort controller if this was the current search
+                if (currentSearchAbortController === signal) {
+                    isSearching = false;
+                    currentSearchAbortController = null;
+                }
                 searchBtn.disabled = false;
-                searchBtn.textContent = 'Search API';
+                searchBtn.textContent = 'Search';
             }
         }
         
-        // Initialize map on load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Allow Enter key to trigger API search
-            const apiSearchInput = document.getElementById('apiSearchInput');
-            if (apiSearchInput) {
-                apiSearchInput.addEventListener('keypress', (e) => {
+        // Load Malaysia states and districts data
+        async function loadMalaysiaData() {
+            try {
+                const response = await fetch('malaysia_states_districts.json');
+                if (response.ok) {
+                    malaysiaData = await response.json();
+                    console.log('Loaded Malaysia states and districts data');
+                } else {
+                    console.warn('Could not load malaysia_states_districts.json, continuing without it');
+                }
+            } catch (error) {
+                console.warn('Error loading malaysia_states_districts.json:', error);
+            }
+        }
+        
+        // Find state and district for a location name
+        function findLocationInfo(locationName) {
+            if (!malaysiaData) return null;
+            
+            const searchName = locationName.toLowerCase().trim();
+            
+            // Search through all states
+            for (const state of malaysiaData.states) {
+                // Check if it's a state name
+                if (state.name.toLowerCase() === searchName) {
+                    return { state: state.name, district: null };
+                }
+                
+                // Check districts
+                for (const district of state.districts) {
+                    if (district.toLowerCase() === searchName) {
+                        return { state: state.name, district: district };
+                    }
+                }
+                
+                // Check major cities
+                for (const city of state.major_cities) {
+                    if (city.toLowerCase() === searchName) {
+                        // Try to find matching district
+                        const matchingDistrict = state.districts.find(d => 
+                            d.toLowerCase().includes(searchName) || 
+                            searchName.includes(d.toLowerCase())
+                        );
+                        return { 
+                            state: state.name, 
+                            district: matchingDistrict || null 
+                        };
+                    }
+                }
+                
+                // Partial match for districts
+                for (const district of state.districts) {
+                    if (district.toLowerCase().includes(searchName) || 
+                        searchName.includes(district.toLowerCase())) {
+                        return { state: state.name, district: district };
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            initMap();
+            await loadMalaysiaData();
+            
+            // Allow Enter key to trigger search
+            const locationSearch = document.getElementById('locationSearch');
+            if (locationSearch) {
+                locationSearch.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        searchFromAPI();
+                        searchLocation();
                     }
                 });
             }
-            
-            // Check if Leaflet is loaded
-            if (typeof L === 'undefined') {
-                console.error('Leaflet.js library not loaded!');
-                alert('Error: Leaflet.js map library failed to load. Please check your internet connection and refresh the page.');
-                return;
-            }
-            
-            try {
-                initMap();
-                console.log('Map initialized successfully');
-                console.log(`API Base URL: ${API_BASE_URL}`);
-                
-                // Verify textarea is accessible and add debugging
-                const jsonInput = document.getElementById('jsonInput');
-                if (jsonInput) {
-                    console.log('✓ JSON textarea found and accessible');
-                    // Ensure it's not disabled
-                    jsonInput.disabled = false;
-                    jsonInput.readOnly = false;
-                    // Add event listeners for debugging
-                    jsonInput.addEventListener('input', function() {
-                        console.log('Textarea input detected, length:', this.value.length);
-                    });
-                    jsonInput.addEventListener('paste', function() {
-                        console.log('Paste event detected');
-                        setTimeout(() => {
-                            console.log('After paste, length:', this.value.length);
-                        }, 100);
-                    });
-                } else {
-                    console.error('✗ JSON textarea not found!');
-                }
-                
-                // Verify button is accessible and add backup event listener
-                const loadButton = document.querySelector('button[onclick="loadMapData()"]');
-                if (loadButton) {
-                    console.log('✓ Load button found');
-                    // Add event listener as backup (in case onclick doesn't work)
-                    loadButton.addEventListener('click', function(e) {
-                        console.log('Button clicked via event listener');
-                        e.preventDefault();
-                        if (typeof window.loadMapData === 'function') {
-                            window.loadMapData();
-                        } else {
-                            console.error('loadMapData function not found!');
-                            alert('Error: loadMapData function not available. Check browser console.');
-                        }
-                    });
-                } else {
-                    console.error('✗ Load button not found!');
-                }
-            } catch (e) {
-                console.error('Error initializing map:', e);
-                alert('Error initializing map: ' + e.message);
-            }
         });
+        
+        // Expose loadMapData for external use
+        window.loadMapData = loadMapData;
+        window.searchLocation = searchLocation;
     </script>
 </body>
 </html>
+

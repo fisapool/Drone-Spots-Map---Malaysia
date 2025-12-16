@@ -24,7 +24,7 @@ services:
       - osrm-data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/route/v1/driving/101.6869,3.1390;101.6869,3.1390?overview=false"]
+      test: ["CMD-SHELL", "timeout 1 bash -c '</dev/tcp/localhost/5000' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

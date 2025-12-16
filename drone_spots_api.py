@@ -323,6 +323,73 @@ def load_malaysian_drone_spots() -> Dict[str, Dict[str, Any]]:
 
 MALAYSIAN_DRONE_SPOTS = load_malaysian_drone_spots()
 
+# Load Malaysian states/districts/postal codes data
+def load_malaysia_postal_codes() -> Dict[str, Any]:
+    """Load Malaysian postal codes data from JSON file"""
+    postal_file = Path(__file__).parent / "malaysia_states_districts.json"
+    try:
+        with open(postal_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Create a lookup dictionary: postal_code -> state/district info
+            postal_lookup = {}
+            for state in data.get('states', []):
+                state_name = state.get('name', '')
+                # Check postal code ranges
+                if 'postal_code_range' in state:
+                    range_info = state['postal_code_range']
+                    start = int(range_info.get('start', '00000'))
+                    end = int(range_info.get('end', '99999'))
+                    postal_lookup[f"{start}-{end}"] = {
+                        'state': state_name,
+                        'code': state.get('code', ''),
+                        'range': range_info
+                    }
+                # Check individual postal codes
+                if 'postal_codes' in state:
+                    for pc in state['postal_codes']:
+                        postal_lookup[pc] = {
+                            'state': state_name,
+                            'code': state.get('code', ''),
+                            'type': 'individual'
+                        }
+                # Check major city postal codes
+                if 'major_city_postal_codes' in state:
+                    for city, codes in state['major_city_postal_codes'].items():
+                        for pc in codes:
+                            if pc not in postal_lookup:
+                                postal_lookup[pc] = {
+                                    'state': state_name,
+                                    'code': state.get('code', ''),
+                                    'city': city,
+                                    'type': 'major_city'
+                                }
+                # Check district postal codes
+                if 'district_postal_codes' in state:
+                    for district, codes in state['district_postal_codes'].items():
+                        for pc in codes:
+                            if pc not in postal_lookup:
+                                postal_lookup[pc] = {
+                                    'state': state_name,
+                                    'code': state.get('code', ''),
+                                    'district': district,
+                                    'type': 'district'
+                                }
+            return {
+                'states_data': data.get('states', []),
+                'postal_lookup': postal_lookup
+            }
+    except FileNotFoundError:
+        logger.warning(f"Malaysia postal codes file not found: {postal_file}. Postal code validation disabled.")
+        return {'states_data': [], 'postal_lookup': {}}
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing Malaysia postal codes JSON: {e}. Postal code validation disabled.")
+        return {'states_data': [], 'postal_lookup': {}}
+    except Exception as e:
+        logger.error(f"Error loading Malaysia postal codes: {e}. Postal code validation disabled.")
+        return {'states_data': [], 'postal_lookup': {}}
+
+MALAYSIA_POSTAL_DATA = load_malaysia_postal_codes()
+
 
 def is_within_malaysia(lat: float, lon: float) -> bool:
     """
@@ -340,6 +407,14 @@ def is_within_malaysia(lat: float, lon: float) -> bool:
         return True
     
     return False
+
+
+def is_in_east_malaysia(lat: float, lon: float) -> bool:
+    """
+    Check if coordinates are in East Malaysia (Sabah/Sarawak).
+    East Malaysia: ~0.85°N to 7.36°N, 109.5°E to 119.27°E
+    """
+    return 0.85 <= lat <= 7.36 and 109.5 <= lon <= 119.27
 
 
 def is_inappropriate_location(place: Dict, name: str) -> bool:
@@ -492,6 +567,7 @@ class LocationRequest(BaseModel):
     address: Optional[str] = Field(None, description="Address, POI, or location name")
     state: Optional[str] = Field(None, description="Malaysian state name")
     district: Optional[str] = Field(None, description="District name")
+    postal_code: Optional[str] = Field(None, description="Malaysian postal code (5 digits)")
     radius_km: float = Field(10.0, description="Search radius in kilometers")
     spot_types: Optional[List[str]] = Field(None, description="Filter by spot types: open_field, beach, hill_mountain, scenic_town")
     max_results: int = Field(20, description="Maximum number of results")
@@ -591,6 +667,7 @@ class QueryLocation(BaseModel):
     address: Optional[str] = None
     state: Optional[str] = None
     district: Optional[str] = None
+    postal_code: Optional[str] = None
 
 
 class SearchResponse(BaseModel):
@@ -606,11 +683,99 @@ async def get_coordinates_from_query(
     lon: Optional[float] = None,
     address: Optional[str] = None,
     state: Optional[str] = None,
-    district: Optional[str] = None
+    district: Optional[str] = None,
+    postal_code: Optional[str] = None
 ) -> tuple:
     """Get coordinates from various input types using multiple geocoding strategies (async)"""
+    # Known locations dictionary (including Malaysian states with their major city coordinates)
+    known_locations = {
+        "bujang valley archaeological museum": (5.737, 100.417),
+        "lembah bujang archaeological museum": (5.737, 100.417),
+        "bujang valley": (5.737, 100.417),
+        "lembah bujang": (5.737, 100.417),
+        # Malaysian states with their major city coordinates
+        "sarawak": (1.5587, 110.3444),  # Kuching, Sarawak
+        "sabah": (5.9804, 116.0735),  # Kota Kinabalu, Sabah
+        "johor": (1.4927, 103.7414),  # Johor Bahru
+        "kedah": (6.1254, 100.3673),  # Alor Setar
+        "kelantan": (6.1254, 102.2381),  # Kota Bharu
+        "melaka": (2.1896, 102.2501),  # Melaka City
+        "negeri sembilan": (2.7258, 101.9378),  # Seremban
+        "pahang": (3.8167, 103.3333),  # Kuantan
+        "penang": (5.4164, 100.3327),  # George Town
+        "perak": (4.5921, 101.0901),  # Ipoh
+        "perlis": (6.4444, 100.1989),  # Kangar
+        "selangor": (3.0738, 101.5183),  # Shah Alam
+        "terengganu": (5.3296, 103.1370),  # Kuala Terengganu
+        "wilayah persekutuan": (3.1526, 101.7022),  # Kuala Lumpur
+        "kuala lumpur": (3.1526, 101.7022),  # Kuala Lumpur
+        "labuan": (5.2767, 115.2417),  # Labuan
+        "putrajaya": (2.9264, 101.6964),  # Putrajaya
+    }
+    
     if lat and lon:
         return lat, lon
+    
+    # Handle postal code search (Malaysian postal codes are 5 digits)
+    if postal_code:
+        # Clean and validate postal code
+        postal_code_clean = postal_code.strip().replace(" ", "").replace("-", "")
+        if postal_code_clean.isdigit() and len(postal_code_clean) == 5:
+            # First, try to validate and get state/district info from JSON data
+            postal_info = None
+            postal_lookup = MALAYSIA_POSTAL_DATA.get('postal_lookup', {})
+            
+            # Check exact match first
+            if postal_code_clean in postal_lookup:
+                postal_info = postal_lookup[postal_code_clean]
+                logger.info(f"Postal code {postal_code_clean} found in database: {postal_info.get('state', 'Unknown')}")
+            else:
+                # Check if it falls within a known range
+                postal_int = int(postal_code_clean)
+                for range_key, info in postal_lookup.items():
+                    if '-' in range_key:
+                        start_str, end_str = range_key.split('-')
+                        if start_str.isdigit() and end_str.isdigit():
+                            start = int(start_str)
+                            end = int(end_str)
+                            if start <= postal_int <= end:
+                                postal_info = info
+                                logger.info(f"Postal code {postal_code_clean} falls within range for {info.get('state', 'Unknown')}")
+                                break
+            
+            # Try geocoding with postal code + Malaysia (or with state if we found it)
+            try:
+                geocode_query = f"{postal_code_clean}, Malaysia"
+                if postal_info and postal_info.get('state'):
+                    # Add state for better geocoding accuracy
+                    geocode_query = f"{postal_code_clean}, {postal_info['state']}, Malaysia"
+                
+                location = await asyncio.to_thread(
+                    geolocator.geocode, 
+                    geocode_query, 
+                    timeout=10, 
+                    exactly_one=True
+                )
+                if location and is_within_malaysia(location.latitude, location.longitude):
+                    return location.latitude, location.longitude
+                elif location:
+                    # Location found but outside Malaysia - log warning
+                    logger.warning(f"Postal code {postal_code_clean} geocoded to location outside Malaysia: {location.address}")
+            except Exception as e:
+                logger.warning(f"Postal code geocoding failed: {e}")
+            
+            # If geocoding failed but we have postal info, we could use a fallback
+            # For now, we'll let it fall through to other query strategies
+        else:
+            logger.warning(f"Invalid postal code format: {postal_code} (expected 5 digits)")
+    
+    # Check known locations early (especially for state names)
+    if address:
+        address_lower = address.lower().strip()
+        if address_lower in known_locations:
+            lat, lon = known_locations[address_lower]
+            logger.info(f"Found known location for '{address}': ({lat}, {lon})")
+            return lat, lon
     
     query_parts = []
     if address:
@@ -619,9 +784,11 @@ async def get_coordinates_from_query(
         query_parts.append(district)
     if state:
         query_parts.append(state)
+    if postal_code:
+        query_parts.append(postal_code)
     
     if not query_parts:
-        raise ValueError("Must provide coordinates, address, state, or district")
+        raise ValueError("Must provide coordinates, address, state, district, or postal code")
     
     # Build comprehensive query list with multiple strategies
     queries = []
@@ -637,9 +804,9 @@ async def get_coordinates_from_query(
     # Strategy 3: Full address without country
     queries.append(", ".join(query_parts))
     
-    # Strategy 4: Just the address with country
+    # Strategy 4: Just the address with country (prioritize this for state names)
     if address:
-        queries.append(address + ", Malaysia")
+        queries.insert(0, address + ", Malaysia")  # Insert at beginning for priority
         queries.append(address)
     
     # Strategy 5: Try simplified address (remove common suffixes like "Museum", "Archaeological", etc.)
@@ -732,14 +899,7 @@ async def get_coordinates_from_query(
             logger.warning(f"Best geocoding match is outside Malaysia: {best_match.address}")
         return best_match.latitude, best_match.longitude
     
-    # All Nominatim queries failed - try known coordinates first (fastest fallback)
-    known_locations = {
-        "bujang valley archaeological museum": (5.737, 100.417),
-        "lembah bujang archaeological museum": (5.737, 100.417),
-        "bujang valley": (5.737, 100.417),
-        "lembah bujang": (5.737, 100.417),
-    }
-    
+    # All Nominatim queries failed - try known coordinates as final fallback
     if address:
         address_lower = address.lower().strip()
         if address_lower in known_locations:
@@ -1330,6 +1490,13 @@ async def search_places_nearby(
     })
     # #endregion
     
+    # Check if we're in East Malaysia (Sabah/Sarawak) - increase radius for better coverage
+    is_east_malaysia = is_in_east_malaysia(lat, lon)
+    if is_east_malaysia:
+        # Increase radius by 50% for East Malaysia due to lower OSM coverage
+        radius_km = radius_km * 1.5
+        logger.info(f"East Malaysia detected - increasing search radius to {radius_km:.1f}km for better coverage")
+    
     places = []
     
     # Overpass API query for Malaysia
@@ -1401,6 +1568,26 @@ async def search_places_nearby(
         f'node["amenity"="parking"](around:{radius_m},{lat},{lon});',
     ])
     
+    # Additional broader queries for East Malaysia (Sabah/Sarawak) with lower OSM coverage
+    # These include more generic tags that might exist even if specific tags don't
+    if is_east_malaysia:
+        query_parts.extend([
+            # More generic natural features
+            f'node["natural"](around:{radius_m},{lat},{lon});',
+            f'way["natural"](around:{radius_m},{lat},{lon});',
+            # Any tourism-related places
+            f'node["tourism"](around:{radius_m},{lat},{lon});',
+            f'way["tourism"](around:{radius_m},{lat},{lon});',
+            # Any leisure areas
+            f'node["leisure"](around:{radius_m},{lat},{lon});',
+            f'way["leisure"](around:{radius_m},{lat},{lon});',
+            # Landuse areas that might be open
+            f'way["landuse"](around:{radius_m},{lat},{lon});',
+            # Places with names (might be scenic even if not specifically tagged)
+            f'node["name"](around:{radius_m},{lat},{lon});',
+            f'way["name"](around:{radius_m},{lat},{lon});',
+        ])
+    
     # Combine all queries into a single union statement
     if query_parts:
         # #region agent log
@@ -1441,6 +1628,42 @@ async def search_places_nearby(
         except Exception as e:
             logger.warning(f"Overpass API error: {e}")
     
+    # Fallback: If we're in East Malaysia and got very few results, try a broader search
+    if is_east_malaysia and len(places) < 5:
+        logger.info(f"East Malaysia: Only {len(places)} places found, trying broader fallback search")
+        fallback_query_parts = [
+            # Very broad queries - any named place
+            f'node["name"](around:{int(radius_m * 1.5)},{lat},{lon});',
+            f'way["name"](around:{int(radius_m * 1.5)},{lat},{lon});',
+            # Any place with tourism tag
+            f'node["tourism"](around:{int(radius_m * 1.5)},{lat},{lon});',
+            f'way["tourism"](around:{int(radius_m * 1.5)},{lat},{lon});',
+        ]
+        
+        fallback_query = f"""
+        [out:json][timeout:30];
+        (
+            {"".join(fallback_query_parts)}
+        );
+        out center meta;
+        """
+        
+        try:
+            if _http_client is None:
+                async with httpx.AsyncClient(timeout=35.0) as client:
+                    response = await client.get(overpass_url, params={"data": fallback_query})
+            else:
+                response = await _http_client.get(overpass_url, params={"data": fallback_query})
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "elements" in data:
+                    fallback_places = data["elements"]
+                    logger.info(f"East Malaysia fallback search found {len(fallback_places)} additional places")
+                    places.extend(fallback_places)
+        except Exception as e:
+            logger.warning(f"East Malaysia fallback search error: {e}")
+    
     # Deduplicate by coordinates
     seen = set()
     unique_places = []
@@ -1464,18 +1687,40 @@ async def search_places_nearby(
             ("center" in place and is_within_malaysia(place["center"]["lat"], place["center"]["lon"]))
         )
     ]
+    places_after_malaysia_filter = len(unique_places)
     
     # Filter out places without names (usually less significant)
+    # BUT allow places with good leisure/natural tags even without names
+    # Expanded to include more types of open spaces and recreational areas
+    # For East Malaysia, be more lenient since OSM coverage is lower
     unique_places = [
         place for place in unique_places 
-        if place.get("tags", {}).get("name") or place.get("tags", {}).get("name:en")
+        if (
+            place.get("tags", {}).get("name") or 
+            place.get("tags", {}).get("name:en") or
+            # Allow unnamed places with good tags for drone spots
+            place.get("tags", {}).get("leisure") in ["park", "recreation_ground", "beach_resort", "sports_centre", "stadium", "pitch", "playground"] or
+            place.get("tags", {}).get("natural") in ["beach", "peak", "grassland", "meadow"] or
+            place.get("tags", {}).get("tourism") in ["attraction", "viewpoint"] or
+            place.get("tags", {}).get("landuse") in ["meadow", "grass", "recreation_ground"] or
+            place.get("tags", {}).get("historic") or  # Historic sites are often scenic
+            # For East Malaysia, be more lenient - allow any place with leisure, natural, tourism, or landuse tags
+            (is_east_malaysia and (
+                place.get("tags", {}).get("leisure") or
+                place.get("tags", {}).get("natural") or
+                place.get("tags", {}).get("tourism") or
+                place.get("tags", {}).get("landuse") in ["meadow", "grass", "recreation_ground", "forest", "farmland"]
+            ))
+        )
     ]
+    places_after_name_filter = len(unique_places)
     
     # FILTER OUT inappropriate locations (companies, factories, offices)
     unique_places = [
         place for place in unique_places
         if not is_inappropriate_location(place, place.get("tags", {}).get("name", "") or place.get("tags", {}).get("name:en", ""))
     ]
+    places_after_inappropriate_filter = len(unique_places)
     
     # Calculate relevance scores and rank places
     scored_places = []
@@ -1500,17 +1745,38 @@ async def search_places_nearby(
     # Sort by relevance score (highest first)
     scored_places.sort(key=lambda x: x[0], reverse=True)
     
-    # Filter out very low relevance scores (< 30) to improve result quality
-    filtered_places = [place for score, place in scored_places if score >= 30]
+    # Filter out very low relevance scores (< 5) to improve result quality
+    # Lowered from 10 to 5 to allow more valid spots through, especially for areas with fewer OSM entries
+    # Base score is 50, so even with penalties, most valid places should score > 5
+    # This helps in areas where OSM data might be sparse
+    # For East Malaysia, use even lower threshold (3) due to lower OSM coverage
+    relevance_threshold = 3 if is_east_malaysia else 5
+    filtered_places = [place for score, place in scored_places if score >= relevance_threshold]
     
     # #region agent log
     debug_log(session_id, run_id, "D", "drone_spots_api.py:search_places_nearby:exit", "search_places_nearby complete", {
         "total_elapsed": time.time() - search_start, 
-        "places_found": len(unique_places), 
-        "filtered_places": len(filtered_places),
-        "total_query_parts": len(query_parts)
+        "raw_places_from_api": len(places),
+        "unique_places_after_dedup": len(unique_places),
+        "places_after_malaysia_filter": places_after_malaysia_filter,
+        "places_after_name_filter": places_after_name_filter,
+        "places_after_inappropriate_filter": places_after_inappropriate_filter,
+        "scored_places": len(scored_places),
+        "filtered_places_after_relevance": len(filtered_places),
+        "total_query_parts": len(query_parts),
+        "search_location": f"{lat},{lon}",
+        "radius_km": radius_km
     })
     # #endregion
+    
+    # Log warning if no places found
+    if len(filtered_places) == 0:
+        logger.warning(f"No places found for location {lat},{lon} with radius {radius_km}km. "
+                      f"Raw places: {len(places)}, After dedup: {len(unique_places)}, "
+                      f"After Malaysia filter: {places_after_malaysia_filter}, "
+                      f"After name filter: {places_after_name_filter}, "
+                      f"After inappropriate filter: {places_after_inappropriate_filter}, "
+                      f"Scored: {len(scored_places)}")
     
     return filtered_places
 
@@ -2289,6 +2555,7 @@ async def search_drone_spots(
     address: Optional[str] = Query(None, description="Address, POI, or location name"),
     state: Optional[str] = Query(None, description="Malaysian state name"),
     district: Optional[str] = Query(None, description="District name"),
+    postal_code: Optional[str] = Query(None, description="Malaysian postal code (5 digits, e.g., '50000')"),
     radius_km: float = Query(10.0, description="Search radius in kilometers"),
     spot_types: Optional[str] = Query(None, description="Comma-separated spot types: open_field,beach,hill_mountain,scenic_town"),
     max_results: int = Query(20, description="Maximum number of results"),
@@ -2302,6 +2569,7 @@ async def search_drone_spots(
     - Address or POI name
     - State name
     - District name
+    - Postal code (5 digits, e.g., '50000' for Kuala Lumpur)
     
     Returns spots with terrain analysis, safety scores, and no-fly zone information.
     """
@@ -2331,7 +2599,8 @@ async def search_drone_spots(
             lon=longitude,
             address=address,
             state=state,
-            district=district
+            district=district,
+            postal_code=postal_code
         )
         
         # Validate coordinates are within Malaysia
@@ -2351,6 +2620,34 @@ async def search_drone_spots(
         places_start = time.time()
         debug_log(session_id, run_id, "D", "drone_spots_api.py:search_drone_spots:before_search_places", "Before search_places_nearby")
         # #endregion
+        
+        # Detect if query is a state-level search and increase radius accordingly
+        malaysian_states = [
+            "sarawak", "sabah", "johor", "kedah", "kelantan", "melaka", "malacca",
+            "negeri sembilan", "pahang", "penang", "pulau pinang", "perak",
+            "perlis", "selangor", "terengganu", "wilayah persekutuan",
+            "kuala lumpur", "labuan", "putrajaya"
+        ]
+        
+        query_lower = ""
+        if address:
+            query_lower = address.lower().strip()
+        elif state:
+            query_lower = state.lower().strip()
+        
+        is_state_query = query_lower in malaysian_states
+        
+        # Check if we're in East Malaysia and adjust radius if needed
+        is_east_malaysia = is_in_east_malaysia(query_lat, query_lon)
+        if is_east_malaysia and radius_km < 15:
+            # For East Malaysia, use minimum 15km radius for better coverage
+            radius_km = max(radius_km, 15.0)
+            logger.info(f"East Malaysia detected - using minimum radius of {radius_km}km")
+        
+        # For state-level queries, use a much larger radius (50km minimum)
+        if is_state_query:
+            radius_km = max(radius_km, 50.0)
+            logger.info(f"State-level query detected ({query_lower}) - using minimum radius of {radius_km}km")
         
         # Search for places
         places = await search_places_nearby(
@@ -2464,6 +2761,7 @@ async def search_drone_spots(
         
         return SearchResponse(
             query_location=QueryLocation(
+                postal_code=postal_code,
                 latitude=query_lat,
                 longitude=query_lon,
                 address=address or f"{query_lat}, {query_lon}",

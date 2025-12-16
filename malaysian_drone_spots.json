@@ -1,0 +1,53 @@
+{
+  "Gunung Jerai": {
+    "lat": 5.7833,
+    "lon": 100.4333,
+    "type": "hill_mountain"
+  },
+  "Langkawi": {
+    "lat": 6.3500,
+    "lon": 99.8000,
+    "type": "beach"
+  },
+  "Cameron Highlands": {
+    "lat": 4.5000,
+    "lon": 101.3833,
+    "type": "hill_mountain"
+  },
+  "Genting Highlands": {
+    "lat": 3.4253,
+    "lon": 101.7933,
+    "type": "hill_mountain"
+  },
+  "Penang Hill": {
+    "lat": 5.4300,
+    "lon": 100.2700,
+    "type": "hill_mountain"
+  },
+  "Batu Ferringhi": {
+    "lat": 5.4700,
+    "lon": 100.2500,
+    "type": "beach"
+  },
+  "Port Dickson": {
+    "lat": 2.5167,
+    "lon": 101.8000,
+    "type": "beach"
+  },
+  "Tioman Island": {
+    "lat": 2.8167,
+    "lon": 104.1167,
+    "type": "beach"
+  },
+  "Redang Island": {
+    "lat": 5.7833,
+    "lon": 103.0167,
+    "type": "beach"
+  },
+  "Perhentian Islands": {
+    "lat": 5.9167,
+    "lon": 102.7333,
+    "type": "beach"
+  }
+}
+

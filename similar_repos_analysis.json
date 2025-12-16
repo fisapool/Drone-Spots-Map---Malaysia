@@ -1,0 +1,210 @@
+{
+  "total_repos": 43,
+  "top_similar": [
+    {
+      "name": "Aresga/FastAPI-Air-guardian",
+      "description": "simple backend service for AirGuardian application, a drone surveillance system designed to detect and log unauthorized drone activity within a protected airspace.",
+      "url": "https://github.com/Aresga/FastAPI-Air-guardian",
+      "stars": 0,
+      "language": "Python",
+      "updated": "2025-07-21",
+      "license": "N/A",
+      "similarity_score": 3
+    },
+    {
+      "name": "aanvi145/UAV-Deconfliction",
+      "description": "A Python-based strategic deconfliction system to verify UAV (drone) flight plans in shared airspace. Performs 4D (3D space + time) conflict detection and provides 3D visualization of mission trajectories.",
+      "url": "https://github.com/aanvi145/UAV-Deconfliction",
+      "stars": 3,
+      "language": "Python",
+      "updated": "2025-11-11",
+      "license": "N/A",
+      "similarity_score": 2
+    },
+    {
+      "name": "MattGibbard/Can-I-Drone",
+      "description": "A web app to show the weather conditions for drone flying as well as local 'no-fly' zones.",
+      "url": "https://github.com/MattGibbard/Can-I-Drone",
+      "stars": 1,
+      "language": "JavaScript",
+      "updated": "2024-01-13",
+      "license": "N/A",
+      "similarity_score": 2
+    },
+    {
+      "name": "shivansh-p/dronevision",
+      "description": "App that will enable small drone operators to know more about specific weather parameters, local terrain and no fly zones within a five-mile radius of their GPS location.",
+      "url": "https://github.com/shivansh-p/dronevision",
+      "stars": 1,
+      "language": null,
+      "updated": "2024-02-14",
+      "license": "MIT License",
+      "similarity_score": 2
+    },
+    {
+      "name": "Mynlessme/DroneSafetyFiji",
+      "description": "This is a KML file which shows all the Drone No-Fly Zones in Fiji.",
+      "url": "https://github.com/Mynlessme/DroneSafetyFiji",
+      "stars": 0,
+      "language": null,
+      "updated": "2021-07-28",
+      "license": "N/A",
+      "similarity_score": 2
+    },
+    {
+      "name": "wlorand/mapbox-dc-no-drone-zone",
+      "description": "React & MapBox GL Integration: FAA Drone No-Fly-Zone: Wash D.C. (2019)",
+      "url": "https://github.com/wlorand/mapbox-dc-no-drone-zone",
+      "stars": 0,
+      "language": "JavaScript",
+      "updated": "2019-09-15",
+      "license": "N/A",
+      "similarity_score": 2
+    },
+    {
+      "name": "LJAero/dflight-examples-python",
+      "description": "Tutorials and example code for working with DFlight API",
+      "url": "https://github.com/LJAero/dflight-examples-python",
+      "stars": 0,
+      "language": "Jupyter Notebook",
+      "updated": "2023-02-05",
+      "license": "MIT License",
+      "similarity_score": 2
+    },
+    {
+      "name": "naraku1122/Dronuts",
+      "description": "Context Two of your close friends run a successful artisanal donut shop in Lawrenceville, PA. Looking for ways to expand their business, they reach out to you, knowing that you will apply your skills for startup engineering to the problem.  Background: Donuts Donuts are America's favorite pastry, topping $15bn1 in sales annually. However, two key factors have limited their market saturation:  Short shelf-life Unlike other pastries (like cookies or muffins), donuts retain optimal texture for only one to two days after baking. This means they must be sold quickly after baking and consumed rapidly, making efficient distribution essential.  Poor afternoon sales Most people buy donuts out of convenience while purchasing their morning coffee. Rival donut company Dunkin' Donuts reported to shareholders that approximately 70% of their sales occur before 11am.2 This likely indicates an untapped market of individuals who are interested in purchasing donuts, but find it too inconvienient after their morning stop.  Background: Drones A reclusive (and entirely fictional) genius has finally developed a safe and cost-effective lithium-air3 battery! This technology enables the development of lightweight unmanned aerial vehicles (UAVs), better known as drones. These new batteries improve the flight time of small drones (the size of the Iris Pixhawk+,4 say) by an order of magnitude (from 16-20 minutes to 1-2 hours).  Inspired by Elon Musk's decision to open-source Tesla's patents, 5, the inventory decided to do the same with his battery. This led to the commoditization of drone-based mobility, which has redefined the way we use drones in a number of ways:  DroneTech, a major player in the UAV market, has created a highly advanced drone mobility solution; enabling you to purchase off-the-shelf drones, and send them to perform deliveries using a REST API. Capitalizing on this, Amazon Prime Air, a drone delivery service for retail items, has seen mainstream use. Most consumers have designated drone delivery points at their home, making delivery failures unlikely. The widespread adoption of drone technologies has led to modification of FAA regulations on drone usage, allowing platforms like DroneTech's to opaquely negotiate airspace access with FAA servers. This is exciting; these developments alleviate most of the fundamental barriers to home delivery of a cheap good via drone.  Your Idea You have a brainflash: software built atop the DroneTech API, coupled with a small fleet of the new drones, could help you capitalize on the vast untapped afternoon donut market! Your donut-making friends are intrigued, and think drone-based donut delivery could work. They're not very tech-savvy, and they have their hands full with the existing business, so they'd rather serve as your first partner/supplier than as co-founders. However, they have a couple of other friends at CMU, to whom they introduce you. With those classmates, you officially found Dronuts, a startup company which delivers fresh donuts via drone. You pool your resources and buy an initial fleet of 6 drones.  Your Product Your basic idea is to build a cloud-backed web application,6 with which several types of users will interact, approximately as follows:  A donut-buying customer will use the app to select donuts from a menu of items offered by the donut shop. The app will redirect customers to an external payment service, CommerceFriend, to enter payment details for their items. The app will identify a suitable drone to perform the delivery based on availability and battery life. Various factors may influence battery life, including distance, weight of the package, and weather/wind. Fortunately, DroneTech's API includes a sophisticated algorithm for managing battery capacity, allowing the drone to automatically return to the shop if the battery level is critical. The app will relay the order to the donut shop in Lawrenceville, and will instruct employees which drone items are to be loaded into. Once loaded, the app should send the drone out for delivery. The customer will be able to track the progress of their delivery in real-time using the app, so they know when to retrieve the items from the drone. (For the purposes of the course, you don't need to worry about the actual physical drone hardware beyond the software considerations surrounding battery life.)  This initial outline is deliberately open-ended, as we intend for you to apply and practice the skills you learn in this class in a realistic startup context.  Over the course of the first half of the semester (eight weeks), you will work with your classmates to design, implement and analyze the software for this (hyopthetical) new startup.  End game? You envision a number of ways this idea might make you fantastically wealthy. Maybe you and your friends will build a country-spanning artisinal delivery donut shop empire. Maybe Amazon Go will take an interest, and acquire you for a fantastic sum. Maybe Dunkin' Donuts will agree to license your SaaS platform, again for a fantastic sum. The sky's the limit! You just need to get the whole thing off the ground...  Citations and Footnotes 1: IBIS World 2017.  2: Dunkin' Donuts U.S. Marketing 2015.  3: Lithium-air batteries have been a theoretical possibility and the subject of research for decades. Wikipedia has more.  4: The IRIS quadcopter.  5: \"All Our Patents are Belong to You\", Tesla blog, 06/12/2014  6: The course staff acknowledges that a mobile app probably does make more sense in this context; we are stipulating a web application for pedagogical purposes.",
+      "url": "https://github.com/naraku1122/Dronuts",
+      "stars": 0,
+      "language": null,
+      "updated": "2021-04-24",
+      "license": "N/A",
+      "similarity_score": 2
+    },
+    {
+      "name": "xumeng367/DroneDetour",
+      "description": "DroneDetour is a Java library and Android demo for UAV path planning and automatic detour navigation. It computes the shortest safe route around polygonal no-fly zones",
+      "url": "https://github.com/xumeng367/DroneDetour",
+      "stars": 131,
+      "language": "Java",
+      "updated": "2025-12-16",
+      "license": "MIT License",
+      "similarity_score": 1
+    },
+    {
+      "name": "aejlaaks/waypointmapping",
+      "description": "DJI mini 4 pro and AIR 3 flight planning software created with ASP.NET core backend and REACT frontend",
+      "url": "https://github.com/aejlaaks/waypointmapping",
+      "stars": 7,
+      "language": "C#",
+      "updated": "2025-11-20",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "u-k-g/drone-pathgen",
+      "description": "A Python interface for advanced drone trajectory planning that generates smooth, collision-free flight paths in complex 3D environments.",
+      "url": "https://github.com/u-k-g/drone-pathgen",
+      "stars": 6,
+      "language": "C++",
+      "updated": "2025-09-14",
+      "license": "MIT License",
+      "similarity_score": 1
+    },
+    {
+      "name": "AishwaryaVirigineni/Multi-Agent-Reinforcement-Learning-for-Drone-Delivery-and-Cooperative-Environments",
+      "description": "This project explores Multi-Agent Reinforcement Learning (MARL) in two environments: a custom Drone Delivery system with no-fly zones and package coordination, and Simple Spread v3 (PettingZoo). We implement tabular (Q-Learning, SARSA, Double Q) and deep RL (DQN, Double DQN, Dueling DQN, QMIX) methods, comparing performance and strategies.",
+      "url": "https://github.com/AishwaryaVirigineni/Multi-Agent-Reinforcement-Learning-for-Drone-Delivery-and-Cooperative-Environments",
+      "stars": 3,
+      "language": "Jupyter Notebook",
+      "updated": "2025-10-07",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "arthurdjn/flightio",
+      "description": "Android application for photogrammetry and drone mapping",
+      "url": "https://github.com/arthurdjn/flightio",
+      "stars": 3,
+      "language": "Java",
+      "updated": "2024-10-27",
+      "license": "GNU General Public License v3.0",
+      "similarity_score": 1
+    },
+    {
+      "name": "thevoidedrahul/Skylark-Drone-Assignment",
+      "description": "From: Byomkesh Bakshi <bb@alaudidaeuavs.com> Subj: Hey, need a quick favour  Hey, I know you're just joining the company and all, but I really need a quick favour.  So we're showing a demo to the client. We have a video that we've shot over their site, as well as a set of aerial images. We would like to show them a POC level app where they can watch the video, and whenever they pause the video to inspect anything, we will be able to show them the images taken at that point. It will  add great value to our entire offering.  We had a guy do it last time, but he's basically disappeared off the face of the earth as far as I know, and he's not left anything... No resignation letter, no code, no farewell treat, nothing.. Looks like you'll have to start from scratch.  I am sending you all the images that we've taken. The images are geotagged, and  the latitude and longitude of the image is stored in the metadata. I believe its called EXIF, but I'm sure you'll be able to look that up easily. The previous dude was using python, and a library called piexif, if I'm not mistaken, but you can use whatever you think is best.  For the video, rather than sending the actual video, I'm just going to send you the SRT file. That's basically like a subtitle file, that has the coordinates of the drone at all the different times in the video.  What I want from you: For every second in the video, I want a list of all the images that lie within 35 metres of the drone position. Give it to me in Excel format. First column, time in seconds. Second column, all the images that lie within 35m. You coders all seem to love CSVs, so thats fine as well, as long as I can open that shit in Excel.  Along with that, I'll also give you an excel of some points of interest for the client. I want all images within 50 meters of these POIs. Give that to me in the same format as above.  Also this is just the first iteration. I'm going to be sending you a LOT of these. Just write code that you can keep running over all the data sets. This time there's only the one video, but there might be more next time. Keep that in mind. Also the 35m and 50m values are not fixed. Its 35 and 50 this time because of the flight  parameters. But if they fly lower next time, the values will be lower and vice versa. Just keep that in mind.  Also, if possible, give me a KML of the drone path from the video. That would be  pretty epic. Just do this if its easy. Not a compulsory requirement. It would help a fair bit in planning.  Cool.  Oh, and I want this in about half an hour. Took the previous fellow that long.  And again, Welcome to Alaudidae.  PS. If you have any ideas on what to do with this data, let me know.  Warm regards, Byomkesh Bakshi Product Ninja Alaudidae UAVs bb@alaudidaeuavs.com",
+      "url": "https://github.com/thevoidedrahul/Skylark-Drone-Assignment",
+      "stars": 3,
+      "language": "Python",
+      "updated": "2025-10-03",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "markzhong88/DroneNoFlyZoneMap",
+      "description": "Drone No Fly Zone Map",
+      "url": "https://github.com/markzhong88/DroneNoFlyZoneMap",
+      "stars": 2,
+      "language": "Swift",
+      "updated": "2025-03-17",
+      "license": "MIT License",
+      "similarity_score": 1
+    },
+    {
+      "name": "Kenneth-Schueman/Distributing-a-Fleet-of-Drones-over-an-Area-with-No-Fly-Zones",
+      "description": "Distributing a fleet of drones over an area with no-fly zones",
+      "url": "https://github.com/Kenneth-Schueman/Distributing-a-Fleet-of-Drones-over-an-Area-with-No-Fly-Zones",
+      "stars": 1,
+      "language": "Python",
+      "updated": "2025-05-12",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "czbxzm/AUTEL-smart-drones-have-a-vulnerability-to-unauthorised-breaches-of-no-fly-zone",
+      "description": "AUTEL-smart-drones-have-a-vulnerability-to-unauthorised-breaches-of-no-fly-zones",
+      "url": "https://github.com/czbxzm/AUTEL-smart-drones-have-a-vulnerability-to-unauthorised-breaches-of-no-fly-zone",
+      "stars": 1,
+      "language": "JavaScript",
+      "updated": "2024-10-18",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "Drone-Lab/Reports-of-AUTEL-drones-losing-control-at-the-edge-of-the-no-fly-zone",
+      "description": "Reports of AUTEL drones losing control at the edge of the no-fly zone",
+      "url": "https://github.com/Drone-Lab/Reports-of-AUTEL-drones-losing-control-at-the-edge-of-the-no-fly-zone",
+      "stars": 1,
+      "language": null,
+      "updated": "2025-02-28",
+      "license": "N/A",
+      "similarity_score": 1
+    },
+    {
+      "name": "melihkurtaran/birdnest",
+      "description": "A web application that displays a list of pilots who have violated a no-fly zone by flying their drones too close to a protected bird nesting area",
+      "url": "https://github.com/melihkurtaran/birdnest",
+      "stars": 1,
+      "language": "Python",
+      "updated": "2023-09-23",
+      "license": "MIT License",
+      "similarity_score": 1
+    },
+    {
+      "name": "discapes/birdnest",
+      "description": "Reaktor 2022 pre-assignment. Fetches drone data and keeps track of no-fly zone offenders. I forgot to add auto-restart, but it's been running with 0 crashes since 11. December.",
+      "url": "https://github.com/discapes/birdnest",
+      "stars": 1,
+      "language": "TypeScript",
+      "updated": "2023-10-23",
+      "license": "N/A",
+      "similarity_score": 1
+    }
+  ],
+  "statistics": {
+    "python_repos": 13,
+    "api_repos": 3,
+    "osm_repos": 0
+  }
+}

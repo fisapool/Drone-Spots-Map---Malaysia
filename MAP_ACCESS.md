@@ -78,3 +78,4 @@ The `view_spots_on_map.py` script uses:
 - The map endpoint is available at `/map` on the API server
 
 
+

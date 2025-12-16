@@ -1,0 +1,105 @@
+{
+  "search_queries": [
+    "best drone spots Malaysia",
+    "drone photography locations Malaysia",
+    "drone flying spots Langkawi",
+    "drone spots Cameron Highlands",
+    "best places to fly drone Kuala Lumpur",
+    "drone photography spots Penang",
+    "Malaysia drone locations",
+    "scenic drone spots Malaysia",
+    "where to fly drone in Malaysia",
+    "Malaysia aerial photography locations",
+    "drone flying areas Malaysia",
+    "best drone spots KL",
+    "drone photography Malaysia blog",
+    "Malaysia drone flying sites",
+    "top drone locations Malaysia",
+    "Malaysia FPV drone spots",
+    "drone spots near me Malaysia",
+    "Malaysia drone regulations allowed areas",
+    "best places for drone video Malaysia",
+    "Malaysia landscape drone photography",
+    "drone spots Johor Bahru",
+    "drone spots Malacca",
+    "drone spots Ipoh",
+    "drone spots Kota Kinabalu",
+    "drone spots Kuching",
+    "Malaysia beach drone spots",
+    "Malaysia mountain drone spots",
+    "Malaysia city drone spots",
+    "drone flying locations Selangor",
+    "drone spots Putrajaya",
+    "Malaysia sunrise drone spots",
+    "Malaysia sunset drone spots",
+    "drone photography guide Malaysia",
+    "Malaysia drone travel blog",
+    "where can I fly drone in Malaysia"
+  ],
+  "target_regions": [
+    "Malaysia",
+    "Kuala Lumpur",
+    "Langkawi",
+    "Penang",
+    "Cameron Highlands",
+    "Malacca",
+    "Johor Bahru"
+  ],
+  "output_file": "scraped_drone_spots.json",
+  "rate_limiting": {
+    "delay_between_requests": 3,
+    "delay_between_pages": 2,
+    "max_retries": 3,
+    "timeout": 30
+  },
+  "user_agents": [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  ],
+  "selectors": {
+    "common_blog": {
+      "title": ["h1", "h2.title", ".post-title", "article h1"],
+      "content": ["article", ".post-content", ".entry-content", "main", ".content"],
+      "location_indicators": [".location", ".place", "[class*='location']", "[class*='place']"]
+    }
+  },
+  "blacklist_urls": [
+    "facebook.com",
+    "twitter.com",
+    "instagram.com",
+    "youtube.com",
+    "reddit.com"
+  ],
+  "blacklist_domains": [
+    "facebook.com",
+    "twitter.com",
+    "instagram.com",
+    "youtube.com",
+    "reddit.com"
+  ],
+  "google_search": {
+    "max_results_per_query": 20,
+    "language": "en",
+    "region": "my",
+    "use_fallback": true
+  },
+  "geocoding": {
+    "use_nominatim": true,
+    "nominatim_user_agent": "drone_spots_scraper/1.0",
+    "geocode_timeout": 10
+  },
+  "location_patterns": {
+    "malaysian_cities": [
+      "Kuala Lumpur", "KL", "Langkawi", "Penang", "George Town",
+      "Cameron Highlands", "Malacca", "Melaka", "Johor Bahru", "JB",
+      "Ipoh", "Kota Kinabalu", "Kuching", "Putrajaya", "Shah Alam",
+      "Petaling Jaya", "PJ", "Subang Jaya", "Klang", "Seremban"
+    ],
+    "coordinate_patterns": [
+      "\\d{1,2}\\.\\d{4,6}[,\\s]+\\d{2,3}\\.\\d{4,6}",
+      "\\d{1,2}°\\d{1,2}'\\d{1,2}\"\\s*[NS][,\\s]+\\d{2,3}°\\d{1,2}'\\d{1,2}\"\\s*[EW]"
+    ]
+  }
+}
+

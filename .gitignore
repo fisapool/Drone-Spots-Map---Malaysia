@@ -48,6 +48,11 @@ map_spots_temp.html
 # results*.json
 # spots*.json
 
+# Scraped data files
+scraped_drone_spots.json
+github_drone_spots.json
+github_search_config.json
+
 # Service files (system-specific)
 *.service
 

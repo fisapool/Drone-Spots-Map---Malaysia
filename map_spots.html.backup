@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Spots Map - Malaysia</title>
+    
+    <!-- Leaflet.js CSS is loaded via CDN link in head -->
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            flex: 1;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .view-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .view-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .view-btn.active {
+            background: rgba(255,255,255,0.4);
+            border-color: white;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        #leafletMapContainer {
+            flex: 1;
+            flex-shrink: 1;
+            min-width: 0;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            /* Prevent page zoom when interacting with map zone */
+            touch-action: pan-x pan-y pinch-zoom;
+        }
+        
+        /* Leaflet marker styles */
+        .custom-marker-query,
+        .custom-marker-spot {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        .sidebar {
+            width: 350px;
+            min-width: 350px;
+            max-width: 350px;
+            background: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1rem;
+            z-index: 1000;
+            flex-shrink: 0;
+            position: relative;
+            pointer-events: auto;
+        }
+        
+        #spotsList {
+            width: 100%;
+            min-width: 0;
+        }
+        
+        .spot-card {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #667eea;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .spot-card:hover {
+            transform: translateX(-4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .spot-card.selected {
+            border-left-color: #28a745;
+            background: #f0fff4;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transform: translateX(-2px);
+        }
+        
+        .spot-card.low-safety {
+            border-left-color: #dc3545;
+        }
+        
+        .spot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .spot-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .safety-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .safety-high {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .safety-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .safety-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .spot-details {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .spot-details strong {
+            color: #333;
+        }
+        
+        .spot-type {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        .no-fly-warning {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .input-section {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .input-section h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .input-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+        
+        .input-section button {
+            width: 100%;
+            padding: 0.75rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background 0.2s;
+        }
+        
+        .input-section button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+        
+        .input-section button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .input-section input[type="search"],
+        .input-section input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            box-sizing: border-box;
+        }
+        
+        .input-section input[type="search"]:focus,
+        .input-section input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        .search-results-info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .elevation-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-size: 0.85rem;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .elevation-info strong {
+            color: #667eea;
+        }
+        
+        /* Tooltip for hover info */
+        .spot-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 250px;
+            display: none;
+        }
+        
+        .weather-card {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #28a745;
+        }
+        
+        .weather-card.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .weather-card.danger {
+            border-left-color: #dc3545;
+        }
+        
+        .weather-card-header {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .weather-card-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .weather-card-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .no-fly-zone-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .no-fly-zone-info.danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        /* Safe area polygon styling */
+        .safe-area-polygon {
+            pointer-events: auto;
+        }
+        
+        .safe-area-info {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .google-maps-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            background: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .google-maps-link:hover {
+            background: #357ae8;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .google-maps-link:visited {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>🗺️ Drone Spots Map - Malaysia</h1>
+            <div class="header-info">Interactive terrain map visualization of drone flying locations</div>
+        </div>
+        <div class="view-controls">
+            <button class="view-btn active" id="btnTerrain" onclick="switchToTerrainView()">Terrain</button>
+            <button class="view-btn" id="btnSatellite" onclick="switchToSatelliteView()">Satellite</button>
+            <button class="view-btn" id="btnStreet" onclick="switchToStreetView()">Street</button>
+            <button class="view-btn active" id="btnDistanceLines" onclick="toggleDistanceLines()">Distance Lines</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="leafletMapContainer" style="flex: 1; height: 100%; position: relative;"></div>
+        <div id="spotTooltip" class="spot-tooltip"></div>
+        <div class="sidebar">
+            <div class="input-section">
+                <h3>Search from API</h3>
+                <div style="margin-bottom: 0.5rem;">
+                    <input type="text" id="apiSearchInput" placeholder="Enter address or location (e.g., Kuala Lumpur)" style="width: 100%; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box;" />
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <input type="number" id="apiRadiusInput" placeholder="Radius (km)" value="15" min="1" max="50" step="1" style="flex: 1; padding: 0.5rem; border: 1px solid #dee2e6; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box;" />
+                        <button onclick="searchFromAPI()" id="apiSearchBtn" style="flex: 1; padding: 0.5rem; background: #28a745; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Search API</button>
+                    </div>
+                    <div id="apiStatusMessage" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666; display: none; min-height: 1.2rem;"></div>
+                </div>
+                
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Load JSON Data</h3>
+                    <textarea id="jsonInput" placeholder="Paste JSON response from API here, or leave empty to use sample data..." style="width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem; resize: vertical; box-sizing: border-box;"></textarea>
+                    <button onclick="loadMapData()" style="width: 100%; padding: 0.75rem; background: #667eea; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; margin-top: 0.5rem; transition: background 0.2s;">Load & Display Spots</button>
+                    <div id="statusMessage" style="margin-top: 0.5rem; font-size: 0.85rem; color: #666; display: none; min-height: 1.2rem;"></div>
+                </div>
+                
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 1rem;">Filter Loaded Spots</h3>
+                    <input type="search" id="searchInput" placeholder="Search by name, address, terrain, or safety score..." oninput="filterSpots()" />
+                    <div id="searchResultsInfo" class="search-results-info" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div id="stats" class="stats" style="display: none;">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalSpots">0</div>
+                    <div class="stat-label">Total Spots</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="avgSafety">0</div>
+                    <div class="stat-label">Avg Safety</div>
+                </div>
+            </div>
+            
+            <div id="spotsList"></div>
+        </div>
+    </div>
+    
+    <!-- Leaflet map handles popups and tooltips -->
+    
+    <!-- Leaflet.js for map visualization (no API key required) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        let leafletMap = null;
+        let leafletMarkers = [];
+        let leafletPolylines = []; // Store distance lines
+        let showDistanceLines = true; // Toggle for distance lines visibility
+        let currentMapLayer = 'terrain'; // 'terrain', 'satellite', 'street'
+        let spotsData = null;
+        let allSpots = []; // Store all spots for filtering
+        let filteredSpots = []; // Currently displayed spots
+        let selectedSpotIndex = null;
+        let noFlyZonePolygons = []; // Store no-fly zone polygons
+        let mapLayers = {}; // Store different map layer types
+        
+        // API configuration - try to auto-detect or use default
+        const API_BASE_URL = (() => {
+            // Try to detect API URL from current page location
+            const hostname = window.location.hostname;
+            const port = window.location.port || '8001';
+            // If accessing via API server (e.g., /map endpoint), use same origin
+            if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                return `${window.location.protocol}//${hostname}:${port}`;
+            }
+            // Default to localhost
+            return 'http://localhost:8001';
+        })();
+        
+        // Sample data (empty - no pre-loaded spots)
+        const sampleData = {
+            "query_location": null,
+            "total_spots_found": 0,
+            "spots": [],
+            "search_radius_km": 15.0
+        };
+        
+        function initMap() {
+            // Check if Leaflet is available
+            if (typeof L === 'undefined') {
+                console.error('Leaflet.js library not loaded!');
+                alert('Error: Leaflet.js map library failed to load. Please check your internet connection and refresh the page.');
+                return;
+            }
+            
+            // Initialize Leaflet map
+            const defaultCenter = [5.737, 100.417]; // Default to Malaysia
+            
+            leafletMap = L.map('leafletMapContainer', {
+                center: defaultCenter,
+                zoom: 12,
+                // Enable scroll wheel zoom on map
+                scrollWheelZoom: true
+            });
+            
+            // Prevent page zoom when mouse wheel is used on map zone
+            const mapContainer = document.getElementById('leafletMapContainer');
+            if (mapContainer) {
+                // Stop wheel events from propagating to page (but allow map zoom)
+                mapContainer.addEventListener('wheel', (e) => {
+                    // Only prevent page zoom if Ctrl/Cmd is NOT pressed
+                    // (Ctrl/Cmd + wheel should still allow browser zoom if user wants it)
+                    if (!e.ctrlKey && !e.metaKey) {
+                        // Stop propagation to prevent page zoom
+                        e.stopPropagation();
+                    }
+                }, { passive: true, capture: true });
+                
+                // Prevent touch zoom gestures from affecting page
+                mapContainer.addEventListener('touchmove', (e) => {
+                    // If it's a pinch gesture (2 touches), prevent page zoom
+                    if (e.touches.length === 2) {
+                        e.stopPropagation();
+                    }
+                }, { passive: true, capture: true });
+            }
+            
+            // Create different map layers
+            mapLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+                subdomains: ['a', 'b', 'c']
+            });
+            
+            mapLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                subdomains: ['a', 'b', 'c']
+            });
+            
+            mapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            });
+            
+            // Add default terrain layer
+            mapLayers.terrain.addTo(leafletMap);
+            currentMapLayer = 'terrain';
+            
+            // Add layer control
+            L.control.layers({
+                "Terrain": mapLayers.terrain,
+                "Street": mapLayers.street,
+                "Satellite": mapLayers.satellite
+            }).addTo(leafletMap);
+            
+            console.log('Leaflet map initialized');
+            
+            // Load initial data
+            loadMapData();
+        }
+        
+        function switchToTerrainView() {
+            if (!leafletMap || !mapLayers.terrain) return;
+            
+            // Remove current layer
+            leafletMap.eachLayer(layer => {
+                if (layer instanceof L.TileLayer) {
+                    leafletMap.removeLayer(layer);
+                }
+            });
+            
+            // Add terrain layer
+            mapLayers.terrain.addTo(leafletMap);
+            currentMapLayer = 'terrain';
+            
+            // Update button states
+            document.getElementById('btnTerrain').classList.add('active');
+            document.getElementById('btnSatellite').classList.remove('active');
+            document.getElementById('btnStreet').classList.remove('active');
+        }
+        
+        function switchToSatelliteView() {
+            if (!leafletMap || !mapLayers.satellite) return;
+            
+            // Remove current layer
+            leafletMap.eachLayer(layer => {
+                if (layer instanceof L.TileLayer) {
+                    leafletMap.removeLayer(layer);
+                }
+            });
+            
+            // Add satellite layer
+            mapLayers.satellite.addTo(leafletMap);
+            currentMapLayer = 'satellite';
+            
+            // Update button states
+            document.getElementById('btnTerrain').classList.remove('active');
+            document.getElementById('btnSatellite').classList.add('active');
+            document.getElementById('btnStreet').classList.remove('active');
+        }
+        
+        function switchToStreetView() {
+            if (!leafletMap || !mapLayers.street) return;
+            
+            // Remove current layer
+            leafletMap.eachLayer(layer => {
+                if (layer instanceof L.TileLayer) {
+                    leafletMap.removeLayer(layer);
+                }
+            });
+            
+            // Add street layer
+            mapLayers.street.addTo(leafletMap);
+            currentMapLayer = 'street';
+            
+            // Update button states
+            document.getElementById('btnTerrain').classList.remove('active');
+            document.getElementById('btnSatellite').classList.remove('active');
+            document.getElementById('btnStreet').classList.add('active');
+        }
+        
+        function toggleDistanceLines() {
+            if (!leafletMap) return;
+            
+            showDistanceLines = !showDistanceLines;
+            const btn = document.getElementById('btnDistanceLines');
+            
+            // Toggle visibility of all polylines
+            leafletPolylines.forEach(polyline => {
+                if (showDistanceLines) {
+                    if (!leafletMap.hasLayer(polyline)) {
+                        polyline.addTo(leafletMap);
+                    }
+                } else {
+                    if (leafletMap.hasLayer(polyline)) {
+                        leafletMap.removeLayer(polyline);
+                    }
+                }
+            });
+            
+            // Update button state
+            if (showDistanceLines) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+        
+        function getSafetyClass(score) {
+            if (score >= 8) return 'safety-high';
+            if (score >= 5) return 'safety-medium';
+            return 'safety-low';
+        }
+        
+        function getMarkerColor(score) {
+            // Return hex color strings for markers
+            if (score >= 8) return '#28a745'; // Green
+            if (score >= 5) return '#ffc107'; // Yellow
+            return '#dc3545'; // Red
+        }
+        
+        function getGoogleMapsLink(lat, lon) {
+            // Generate Google Maps link with coordinates
+            return `https://www.google.com/maps?q=${lat},${lon}`;
+        }
+        
+        function clearMap() {
+            // Clear Leaflet markers
+            if (leafletMap) {
+                leafletMarkers.forEach(marker => marker.remove());
+                leafletMarkers = [];
+            }
+        }
+        
+        // Make loadMapData globally accessible
+        window.loadMapData = function loadMapData() {
+            console.log('loadMapData called');
+            
+            const jsonInputElement = document.getElementById('jsonInput');
+            if (!jsonInputElement) {
+                alert('Error: JSON input textarea not found!');
+                console.error('jsonInput element not found');
+                return;
+            }
+            
+            // Check if textarea is disabled or readonly
+            if (jsonInputElement.disabled || jsonInputElement.readOnly) {
+                console.warn('Textarea is disabled or readonly');
+            }
+            
+            let jsonInput = jsonInputElement.value.trim();
+            console.log('JSON input length:', jsonInput.length);
+            let data;
+            
+            if (jsonInput) {
+                // Clean the input: remove common issues
+                // Remove shell prompts and terminal artifacts
+                jsonInput = jsonInput.replace(/arif@[^\$]*\$[\s]*$/gm, '');
+                jsonInput = jsonInput.replace(/^[^\{\[]*[\{\[]/, '{'); // Remove text before first { or [
+                jsonInput = jsonInput.replace(/[\}\]]\s*[^\}\]]*$/, '}'); // Remove text after last } or ]
+                
+                // Try to extract JSON if it's embedded in other text
+                // Look for JSON object/array boundaries
+                const jsonMatch = jsonInput.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+                if (jsonMatch) {
+                    jsonInput = jsonMatch[1];
+                }
+                
+                // Final trim
+                jsonInput = jsonInput.trim();
+                
+                try {
+                    data = JSON.parse(jsonInput);
+                    console.log('JSON parsed successfully:', data);
+                } catch (e) {
+                    // Try one more time with more aggressive cleaning
+                    try {
+                        // Remove everything before first { and after last }
+                        const firstBrace = jsonInput.indexOf('{');
+                        const lastBrace = jsonInput.lastIndexOf('}');
+                        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                            jsonInput = jsonInput.substring(firstBrace, lastBrace + 1);
+                            data = JSON.parse(jsonInput);
+                            console.log('JSON parsed after cleaning:', data);
+                        } else {
+                            throw e;
+                        }
+                    } catch (e2) {
+                        alert('Invalid JSON! Please check your input.\n\nError: ' + e.message + '\n\nTip: Make sure you only paste the JSON data, not terminal prompts or other text.');
+                        console.error('JSON parse error:', e);
+                        console.error('Cleaned input:', jsonInput.substring(0, 200) + '...');
+                        return;
+                    }
+                }
+            } else {
+                data = sampleData;
+                console.log('Using sample data');
+            }
+            
+            // Validate data structure
+            if (!data || typeof data !== 'object') {
+                alert('Invalid data format! Expected an object with "spots" array.');
+                console.error('Invalid data:', data);
+                return;
+            }
+            
+            if (!data.spots || !Array.isArray(data.spots)) {
+                alert('Data does not contain a "spots" array!\n\nExpected format:\n{\n  "spots": [...],\n  "query_location": {...}\n}');
+                console.error('Missing spots array. Data structure:', Object.keys(data));
+                return;
+            }
+            
+            console.log(`Loading ${data.spots.length} spots`);
+            
+            // Show status message
+            const statusMsg = document.getElementById('statusMessage');
+            if (statusMsg) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.color = '#666';
+                statusMsg.textContent = `Loading ${data.spots.length} spots...`;
+            }
+            
+            spotsData = data;
+            clearMap();
+            
+            try {
+                displaySpots(data);
+                console.log('Map updated successfully');
+                
+                // Update status message
+                if (statusMsg) {
+                    statusMsg.style.color = '#28a745';
+                    statusMsg.textContent = `✓ Successfully loaded ${data.spots.length} spots`;
+                    setTimeout(() => {
+                        statusMsg.style.display = 'none';
+                    }, 3000);
+                }
+            } catch (e) {
+                const errorMsg = 'Error displaying spots on map!\nError: ' + e.message;
+                alert(errorMsg);
+                console.error('Display error:', e);
+                
+                // Update status message
+                if (statusMsg) {
+                    statusMsg.style.color = '#dc3545';
+                    statusMsg.textContent = '✗ Error: ' + e.message;
+                }
+            }
+        };
+        
+        function displaySpots(data) {
+            if (!leafletMap) {
+                console.error('Map not initialized!');
+                alert('Map not initialized. Please refresh the page.');
+                return;
+            }
+            
+            const spots = data.spots || [];
+            const queryLocation = data.query_location;
+            
+            console.log(`Displaying ${spots.length} spots`);
+            
+            if (spots.length === 0) {
+                alert('No spots found in the data!');
+                return;
+            }
+            
+            // Center map on query location
+            if (queryLocation) {
+                leafletMap.setView([queryLocation.latitude, queryLocation.longitude], 12);
+            }
+            
+            // Add search radius circle
+            if (queryLocation && data.search_radius_km) {
+                addSearchRadiusCircle(queryLocation.latitude, queryLocation.longitude, data.search_radius_km);
+            }
+            
+            // Load and display no-fly zones
+            if (queryLocation) {
+                loadNoFlyZones(queryLocation.latitude, queryLocation.longitude, data.search_radius_km || 15);
+            }
+            
+            // Display spots on Leaflet map
+            displaySpotsOnLeafletMap();
+            
+            // Update sidebar
+            updateSidebar(data);
+        }
+        
+        function addSearchRadiusCircle(centerLat, centerLon, radiusKm) {
+            if (!leafletMap || typeof L === 'undefined') return;
+            
+            // Add search radius circle to Leaflet map
+            const circle = L.circle(
+                [centerLat, centerLon],
+                {
+                    radius: radiusKm * 1000, // Convert km to meters
+                    color: '#007bff',
+                    fillColor: '#007bff',
+                    fillOpacity: 0.2,
+                    weight: 2
+                }
+            ).addTo(leafletMap)
+            .bindPopup(`Search Radius: ${radiusKm} km`);
+            
+            leafletMarkers.push(circle);
+        }
+        
+        async function loadNoFlyZones(lat, lon, radiusKm) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/no-fly-zones?latitude=${lat}&longitude=${lon}&radius_km=${radiusKm * 2}`);
+                const data = await response.json();
+                
+                const polygons = [];
+                
+                // Create circles for airports (5km radius)
+                data.no_fly_zones?.airports?.forEach(airport => {
+                    const circlePoints = [];
+                    const numPoints = 32;
+                    const radiusDeg = 5 / 111; // 5km radius
+                    
+                    for (let i = 0; i <= numPoints; i++) {
+                        const angle = (i / numPoints) * 2 * Math.PI;
+                        const aLat = airport.lat + radiusDeg * Math.cos(angle);
+                        const aLon = airport.lon + (radiusDeg / Math.cos(airport.lat * Math.PI / 180)) * Math.sin(angle);
+                        circlePoints.push([aLon, aLat]);
+                    }
+                    
+                    polygons.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: [circlePoints]
+                        },
+                        properties: {
+                            name: airport.name || 'Airport',
+                            color: 'rgba(255,0,0,0.4)',
+                            type: 'airport'
+                        }
+                    });
+                });
+                
+                // Create circles for military areas (3km radius)
+                data.no_fly_zones?.military_areas?.forEach(military => {
+                    const circlePoints = [];
+                    const numPoints = 32;
+                    const radiusDeg = 3 / 111; // 3km radius
+                    
+                    for (let i = 0; i <= numPoints; i++) {
+                        const angle = (i / numPoints) * 2 * Math.PI;
+                        const mLat = military.lat + radiusDeg * Math.cos(angle);
+                        const mLon = military.lon + (radiusDeg / Math.cos(military.lat * Math.PI / 180)) * Math.sin(angle);
+                        circlePoints.push([mLon, mLat]);
+                    }
+                    
+                    polygons.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: [circlePoints]
+                        },
+                        properties: {
+                            name: military.name || 'Military Area',
+                            color: 'rgba(255,100,0,0.4)',
+                            type: 'military'
+                        }
+                    });
+                });
+                
+                noFlyZonePolygons = polygons;
+                
+                // Add to Leaflet map
+                if (leafletMap && typeof L !== 'undefined') {
+                    polygons.forEach(poly => {
+                        const coords = poly.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
+                        const polygon = L.polygon(coords, {
+                            color: poly.properties.color,
+                            fillColor: poly.properties.color,
+                            fillOpacity: 0.35,
+                            weight: 2
+                        }).addTo(leafletMap)
+                        .bindPopup(`<strong>${poly.properties.name}</strong><br>No-Fly Zone`);
+                        
+                        leafletMarkers.push(polygon);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading no-fly zones:', error);
+            }
+        }
+        
+        function displaySpotsOnLeafletMap() {
+            if (!leafletMap || !spotsData || typeof L === 'undefined') return;
+            
+            // Clear existing markers and polylines
+            leafletMarkers.forEach(marker => marker.remove());
+            leafletMarkers = [];
+            leafletPolylines.forEach(polyline => leafletMap.removeLayer(polyline));
+            leafletPolylines = [];
+            
+            // Add query location marker
+            if (spotsData.query_location) {
+                const queryIcon = L.divIcon({
+                    className: 'custom-marker-query',
+                    html: '<div style="background: #667eea; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                });
+                
+                const queryMarker = L.marker(
+                    [spotsData.query_location.latitude, spotsData.query_location.longitude],
+                    { icon: queryIcon }
+                ).addTo(leafletMap)
+                .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <strong>Query Location</strong><br>Search center point<br>
+                        <a href="${getGoogleMapsLink(spotsData.query_location.latitude, spotsData.query_location.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
+                    </div>
+                `);
+                
+                leafletMarkers.push(queryMarker);
+            }
+            
+            // Add spot markers and safe area polygons
+            spotsData.spots.forEach(spot => {
+                const color = getMarkerColor(spot.safety_score);
+                const spotIcon = L.divIcon({
+                    className: 'custom-marker-spot',
+                    html: `<div style="background: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                });
+                
+                const marker = L.marker(
+                    [spot.latitude, spot.longitude],
+                    { icon: spotIcon }
+                ).addTo(leafletMap)
+                .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <strong>${spot.name || 'Unnamed Location'}</strong><br>
+                        Safety: ${spot.safety_score}/10<br>
+                        Distance: ${spot.distance_km?.toFixed(2)} km<br>
+                        Elevation: ${spot.elevation_m || 'N/A'} m<br>
+                        ${spot.weather ? `Wind: ${spot.weather.wind_speed_ms || 'N/A'} m/s` : ''}
+                        ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
+                            `<br><span style="color: #dc3545;">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</span>` : ''}
+                        ${spot.safe_area_polygon ? `<br><span style="color: #28a745;">✓ Safe flying area: ${spot.safe_area_polygon.radius_m || 'N/A'}m radius</span>` : ''}
+                        <br><a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
+                    </div>
+                `);
+                
+                leafletMarkers.push(marker);
+                
+                // Draw distance line from query location to spot
+                if (spotsData.query_location) {
+                    const distanceLine = L.polyline(
+                        [
+                            [spotsData.query_location.latitude, spotsData.query_location.longitude],
+                            [spot.latitude, spot.longitude]
+                        ],
+                        {
+                            color: '#667eea',
+                            weight: 2,
+                            opacity: 0.6,
+                            dashArray: '5, 5' // Dashed line style
+                        }
+                    );
+                    
+                    // Add distance label in the middle of the line
+                    const midLat = (spotsData.query_location.latitude + spot.latitude) / 2;
+                    const midLon = (spotsData.query_location.longitude + spot.longitude) / 2;
+                    
+                    const distanceLabel = L.marker([midLat, midLon], {
+                        icon: L.divIcon({
+                            className: 'distance-label',
+                            html: `<div style="background: rgba(102, 126, 234, 0.85); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; white-space: nowrap; border: 1px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">${spot.distance_km?.toFixed(2) || 'N/A'} km</div>`,
+                            iconSize: [60, 20],
+                            iconAnchor: [30, 10]
+                        })
+                    });
+                    
+                    // Conditionally add to map based on toggle state
+                    if (showDistanceLines) {
+                        distanceLine.addTo(leafletMap);
+                        distanceLabel.addTo(leafletMap);
+                    }
+                    
+                    // Always store in array for toggle functionality
+                    leafletPolylines.push(distanceLine);
+                    leafletPolylines.push(distanceLabel);
+                }
+                
+                // Add safe area polygon if available
+                if (spot.safe_area_polygon && spot.safe_area_polygon.coordinates) {
+                    try {
+                        // Convert GeoJSON coordinates [lon, lat] to Leaflet format [lat, lon]
+                        const polygonCoords = spot.safe_area_polygon.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
+                        // Determine polygon color based on safety score
+                        let polygonColor = '#28a745'; // Green for high safety
+                        let polygonFillColor = '#28a745';
+                        if (spot.safety_score >= 9) {
+                            polygonColor = '#28a745'; // Bright green
+                            polygonFillColor = '#28a745';
+                        } else if (spot.safety_score >= 8) {
+                            polygonColor = '#5cb85c'; // Medium green
+                            polygonFillColor = '#5cb85c';
+                        } else {
+                            polygonColor = '#90ee90'; // Light green
+                            polygonFillColor = '#90ee90';
+                        }
+                        
+                        const safeAreaPolygon = L.polygon(polygonCoords, {
+                            color: polygonColor,
+                            fillColor: polygonFillColor,
+                            fillOpacity: 0.2,
+                            weight: 2,
+                            dashArray: '5, 5',
+                            className: 'safe-area-polygon'
+                        }).addTo(leafletMap)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <strong>🛡️ Safe Flying Area</strong><br>
+                                <strong>${spot.name || 'Unnamed Location'}</strong><br>
+                                Safety Score: ${spot.safety_score}/10<br>
+                                Radius: ${spot.safe_area_polygon.radius_m ? spot.safe_area_polygon.radius_m + 'm' : 'N/A'}<br>
+                                <span style="color: #28a745; font-size: 0.9em;">✓ Safe for drone operations</span>
+                            </div>
+                        `);
+                        
+                        leafletMarkers.push(safeAreaPolygon);
+                    } catch (error) {
+                        console.error('Error adding safe area polygon:', error, spot);
+                    }
+                }
+            });
+            
+            // Add search radius circle if not already added
+            if (spotsData.query_location && spotsData.search_radius_km) {
+                const circle = L.circle(
+                    [spotsData.query_location.latitude, spotsData.query_location.longitude],
+                    {
+                        radius: spotsData.search_radius_km * 1000,
+                        color: '#007bff',
+                        fillColor: '#007bff',
+                        fillOpacity: 0.2,
+                        weight: 2
+                    }
+                ).addTo(leafletMap);
+                leafletMarkers.push(circle);
+            }
+            
+            // Fit bounds to show all markers
+            if (leafletMarkers.length > 0) {
+                const group = new L.featureGroup(leafletMarkers);
+                leafletMap.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+        
+        function filterSpots() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const searchInfo = document.getElementById('searchResultsInfo');
+            
+            if (!spotsData || !spotsData.spots) {
+                return;
+            }
+            
+            if (!searchQuery) {
+                // Show all spots
+                filteredSpots = [...allSpots];
+                searchInfo.style.display = 'none';
+            } else {
+                // Filter spots based on search query
+                filteredSpots = allSpots.filter(spot => {
+                    const name = (spot.name || 'Unnamed Location').toLowerCase();
+                    const address = (spot.address || '').toLowerCase();
+                    const terrain = (spot.terrain_type || '').toLowerCase();
+                    const spotType = (spot.spot_type || '').toLowerCase();
+                    const safetyScore = spot.safety_score.toString();
+                    const distance = spot.distance_km ? spot.distance_km.toString() : '';
+                    const elevation = spot.elevation_m ? spot.elevation_m.toString() : '';
+                    
+                    return name.includes(searchQuery) ||
+                           address.includes(searchQuery) ||
+                           terrain.includes(searchQuery) ||
+                           spotType.includes(searchQuery) ||
+                           safetyScore.includes(searchQuery) ||
+                           distance.includes(searchQuery) ||
+                           elevation.includes(searchQuery);
+                });
+                
+                // Show search results info
+                searchInfo.style.display = 'block';
+                if (filteredSpots.length === 0) {
+                    searchInfo.textContent = `No spots found matching "${searchQuery}"`;
+                    searchInfo.style.color = '#dc3545';
+                } else {
+                    searchInfo.textContent = `Found ${filteredSpots.length} of ${allSpots.length} spots`;
+                    searchInfo.style.color = '#666';
+                }
+            }
+            
+            // Update sidebar display
+            displayFilteredSpots();
+            
+            // Update map markers visibility
+            updateMapMarkersVisibility();
+        }
+        
+        function displayFilteredSpots() {
+            const spotsList = document.getElementById('spotsList');
+            const stats = document.getElementById('stats');
+            
+            // Calculate stats from filtered spots
+            const totalSpots = filteredSpots.length;
+            const avgSafety = filteredSpots.length > 0 
+                ? (filteredSpots.reduce((sum, s) => sum + s.safety_score, 0) / filteredSpots.length).toFixed(1)
+                : 0;
+            
+            document.getElementById('totalSpots').textContent = totalSpots;
+            document.getElementById('avgSafety').textContent = avgSafety;
+            stats.style.display = 'grid';
+            
+            // Create spot cards for filtered spots
+            spotsList.innerHTML = filteredSpots.map((spot, displayIndex) => {
+                // Find original index in allSpots array
+                const originalIndex = allSpots.findIndex(s => 
+                    s.latitude === spot.latitude && 
+                    s.longitude === spot.longitude
+                );
+                const index = originalIndex !== -1 ? originalIndex : displayIndex;
+                
+                const safetyClass = getSafetyClass(spot.safety_score);
+                const isLowSafety = spot.safety_score < 5;
+                const cardClass = isLowSafety ? 'spot-card low-safety' : 'spot-card';
+                
+                // Create weather cards if available
+                let weatherCards = '';
+                if (spot.weather) {
+                    const weather = spot.weather;
+                    const windSpeed = weather.wind_speed_ms || 0;
+                    const windClass = windSpeed >= 5.5 ? 'danger' : (windSpeed >= 4.1 ? 'warning' : '');
+                    
+                    weatherCards = `
+                        <div class="weather-card ${windClass}">
+                            <div class="weather-card-header">Wind Speed</div>
+                            <div class="weather-card-value">${windSpeed.toFixed(1)} m/s</div>
+                            <div class="weather-card-text">${windSpeed >= 5.5 ? 'High wind - affects drone performance' : (windSpeed >= 4.1 ? 'Moderate wind' : 'Good conditions')}</div>
+                        </div>
+                    `;
+                    
+                    if (weather.temperature_c !== undefined) {
+                        const temp = weather.temperature_c;
+                        const tempClass = temp >= 35 || temp <= -10 ? 'danger' : (temp <= 0 ? 'warning' : '');
+                        weatherCards += `
+                            <div class="weather-card ${tempClass}">
+                                <div class="weather-card-header">Temperature</div>
+                                <div class="weather-card-value">${temp.toFixed(1)}°C</div>
+                                <div class="weather-card-text">${temp >= 35 || temp <= -10 ? 'Extreme temperature - affects battery' : 'Good for battery'}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (weather.humidity !== undefined) {
+                        const humidity = weather.humidity;
+                        const humidityClass = humidity > 80 ? 'warning' : '';
+                        weatherCards += `
+                            <div class="weather-card ${humidityClass}">
+                                <div class="weather-card-header">Humidity</div>
+                                <div class="weather-card-value">${humidity}%</div>
+                                <div class="weather-card-text">${humidity > 80 ? 'High humidity' : 'Normal'}</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Create no-fly zone warning
+                let noFlyWarning = '';
+                if (spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0) {
+                    const warningClass = spot.safety_score < 5 ? 'danger' : '';
+                    noFlyWarning = `
+                        <div class="no-fly-zone-info ${warningClass}">
+                            <strong>⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</strong><br>
+                            ${spot.no_fly_zones_nearby.slice(0, 2).join('<br>')}
+                            ${spot.no_fly_zones_nearby.length > 2 ? `<br>...and ${spot.no_fly_zones_nearby.length - 2} more` : ''}
+                        </div>
+                    `;
+                }
+                
+                // Create safe area info
+                let safeAreaInfo = '';
+                if (spot.safe_area_polygon && spot.safe_area_polygon.radius_m) {
+                    safeAreaInfo = `
+                        <div class="safe-area-info">
+                            <strong>🛡️ Safe Flying Area</strong><br>
+                            Radius: ${spot.safe_area_polygon.radius_m}m<br>
+                            <span style="font-size: 0.8em; color: #155724;">This area is safe for drone operations</span>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="${cardClass}" id="spot-${index}" data-spot-index="${index}" onclick="focusSpot(${index}); return false;">
+                        <div class="spot-header">
+                            <div class="spot-name">${spot.name || 'Unnamed Location'}</div>
+                            <span class="safety-badge ${safetyClass}">
+                                ${spot.safety_score}/10
+                            </span>
+                        </div>
+                        <div class="spot-details">
+                            <div><strong>Distance:</strong> ${spot.distance_km?.toFixed(2) || 'N/A'} km</div>
+                            <div><strong>Elevation:</strong> ${spot.elevation_m || 'N/A'} m</div>
+                            <div><strong>Terrain:</strong> ${spot.terrain_type || 'Unknown'}</div>
+                            <div><strong>Car Accessible:</strong> ${spot.car_accessible ? '✓ Yes' : '✗ No'}</div>
+                            ${safeAreaInfo}
+                            ${noFlyWarning}
+                            ${weatherCards}
+                            <div class="spot-type">${spot.spot_type?.replace('_', ' ').toUpperCase() || 'UNKNOWN'}</div>
+                            <a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" class="google-maps-link" onclick="event.stopPropagation();">🗺️ Open in Google Maps</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add event delegation as backup for click handling
+            // This ensures clicks work even if inline onclick fails
+            setTimeout(() => {
+                const spotsListContainer = document.getElementById('spotsList');
+                if (spotsListContainer && !spotsListContainer.hasAttribute('data-delegation-added')) {
+                    spotsListContainer.setAttribute('data-delegation-added', 'true');
+                    spotsListContainer.addEventListener('click', (e) => {
+                        const card = e.target.closest('.spot-card');
+                        if (card) {
+                            const indexAttr = card.getAttribute('data-spot-index');
+                            const idAttr = card.id;
+                            let index = null;
+                            
+                            if (indexAttr) {
+                                index = parseInt(indexAttr);
+                            } else if (idAttr && idAttr.startsWith('spot-')) {
+                                index = parseInt(idAttr.replace('spot-', ''));
+                            }
+                            
+                            if (!isNaN(index) && index !== null) {
+                                console.log('Event delegation: clicking spot index', index);
+                                e.preventDefault();
+                                e.stopPropagation();
+                                focusSpot(index);
+                            }
+                        }
+                    }, true); // Use capture phase to catch before inline handlers
+                }
+            }, 0);
+        }
+        
+        function updateMapMarkersVisibility() {
+            // Update Leaflet markers based on filter
+            if (!leafletMap) return;
+            
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            // Clear all spot markers and polylines (keep query location, circles, and polygons)
+            const markersToRemove = [];
+            leafletMarkers.forEach((marker, index) => {
+                // Only remove markers that are actual spot markers
+                if (marker instanceof L.Marker && marker.options && marker.options.spotIndex !== undefined) {
+                    const spotIndex = marker.options.spotIndex;
+                    if (spotIndex >= 0) {
+                        markersToRemove.push(index);
+                    }
+                }
+            });
+            
+            // Remove markers in reverse order to maintain indices
+            markersToRemove.reverse().forEach(index => {
+                leafletMarkers[index].remove();
+                leafletMarkers.splice(index, 1);
+            });
+            
+            // Clear all polylines
+            leafletPolylines.forEach(polyline => leafletMap.removeLayer(polyline));
+            leafletPolylines = [];
+            
+            // Re-add markers based on filter
+            const spotsToShow = searchQuery ? filteredSpots : allSpots;
+            
+            spotsToShow.forEach(spot => {
+                const color = getMarkerColor(spot.safety_score);
+                const spotIcon = L.divIcon({
+                    className: 'custom-marker-spot',
+                    html: `<div style="background: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                });
+                
+                const marker = L.marker(
+                    [spot.latitude, spot.longitude],
+                    { 
+                        icon: spotIcon,
+                        spotIndex: allSpots.indexOf(spot)
+                    }
+                ).addTo(leafletMap)
+                .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <strong>${spot.name || 'Unnamed Location'}</strong><br>
+                        Safety: ${spot.safety_score}/10<br>
+                        Distance: ${spot.distance_km?.toFixed(2)} km<br>
+                        Elevation: ${spot.elevation_m || 'N/A'} m<br>
+                        ${spot.weather ? `Wind: ${spot.weather.wind_speed_ms || 'N/A'} m/s` : ''}
+                        ${spot.no_fly_zones_nearby && spot.no_fly_zones_nearby.length > 0 ? 
+                            `<br><span style="color: #dc3545;">⚠️ ${spot.no_fly_zones_nearby.length} no-fly zone(s) nearby</span>` : ''}
+                        ${spot.safe_area_polygon ? `<br><span style="color: #28a745;">✓ Safe flying area: ${spot.safe_area_polygon.radius_m || 'N/A'}m radius</span>` : ''}
+                        <br><a href="${getGoogleMapsLink(spot.latitude, spot.longitude)}" target="_blank" style="display: inline-block; margin-top: 0.5rem; padding: 0.4rem 0.75rem; background: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">🗺️ Open in Google Maps</a>
+                    </div>
+                `);
+                
+                leafletMarkers.push(marker);
+                
+                // Draw distance line from query location to spot
+                if (spotsData && spotsData.query_location) {
+                    const distanceLine = L.polyline(
+                        [
+                            [spotsData.query_location.latitude, spotsData.query_location.longitude],
+                            [spot.latitude, spot.longitude]
+                        ],
+                        {
+                            color: '#667eea',
+                            weight: 2,
+                            opacity: 0.6,
+                            dashArray: '5, 5' // Dashed line style
+                        }
+                    );
+                    
+                    // Add distance label in the middle of the line
+                    const midLat = (spotsData.query_location.latitude + spot.latitude) / 2;
+                    const midLon = (spotsData.query_location.longitude + spot.longitude) / 2;
+                    
+                    const distanceLabel = L.marker([midLat, midLon], {
+                        icon: L.divIcon({
+                            className: 'distance-label',
+                            html: `<div style="background: rgba(102, 126, 234, 0.85); color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; white-space: nowrap; border: 1px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">${spot.distance_km?.toFixed(2) || 'N/A'} km</div>`,
+                            iconSize: [60, 20],
+                            iconAnchor: [30, 10]
+                        })
+                    });
+                    
+                    // Conditionally add to map based on toggle state
+                    if (showDistanceLines) {
+                        distanceLine.addTo(leafletMap);
+                        distanceLabel.addTo(leafletMap);
+                    }
+                    
+                    // Always store in array for toggle functionality
+                    leafletPolylines.push(distanceLine);
+                    leafletPolylines.push(distanceLabel);
+                }
+                
+                // Re-add safe area polygon if available
+                if (spot.safe_area_polygon && spot.safe_area_polygon.coordinates) {
+                    try {
+                        const polygonCoords = spot.safe_area_polygon.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
+                        let polygonColor = '#28a745';
+                        let polygonFillColor = '#28a745';
+                        if (spot.safety_score >= 9) {
+                            polygonColor = '#28a745';
+                            polygonFillColor = '#28a745';
+                        } else if (spot.safety_score >= 8) {
+                            polygonColor = '#5cb85c';
+                            polygonFillColor = '#5cb85c';
+                        } else {
+                            polygonColor = '#90ee90';
+                            polygonFillColor = '#90ee90';
+                        }
+                        
+                        const safeAreaPolygon = L.polygon(polygonCoords, {
+                            color: polygonColor,
+                            fillColor: polygonFillColor,
+                            fillOpacity: 0.2,
+                            weight: 2,
+                            dashArray: '5, 5',
+                            className: 'safe-area-polygon'
+                        }).addTo(leafletMap)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <strong>🛡️ Safe Flying Area</strong><br>
+                                <strong>${spot.name || 'Unnamed Location'}</strong><br>
+                                Safety Score: ${spot.safety_score}/10<br>
+                                Radius: ${spot.safe_area_polygon.radius_m ? spot.safe_area_polygon.radius_m + 'm' : 'N/A'}<br>
+                                <span style="color: #28a745; font-size: 0.9em;">✓ Safe for drone operations</span>
+                            </div>
+                        `);
+                        
+                        leafletMarkers.push(safeAreaPolygon);
+                    } catch (error) {
+                        console.error('Error adding safe area polygon:', error, spot);
+                    }
+                }
+            });
+        }
+        
+        function updateSidebar(data) {
+            const spots = data.spots || [];
+            const spotsList = document.getElementById('spotsList');
+            const stats = document.getElementById('stats');
+            
+            // Store all spots for filtering
+            allSpots = [...spots];
+            filteredSpots = [...spots];
+            
+            // Clear search input
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResultsInfo').style.display = 'none';
+            
+            // Calculate stats
+            const totalSpots = spots.length;
+            const avgSafety = spots.length > 0 
+                ? (spots.reduce((sum, s) => sum + s.safety_score, 0) / spots.length).toFixed(1)
+                : 0;
+            
+            document.getElementById('totalSpots').textContent = totalSpots;
+            document.getElementById('avgSafety').textContent = avgSafety;
+            stats.style.display = 'grid';
+            
+            // Display all spots initially
+            displayFilteredSpots();
+        }
+        
+        // Make focusSpot globally accessible
+        window.focusSpot = function focusSpot(index) {
+            console.log('focusSpot called with index:', index);
+            
+            if (!leafletMap) {
+                console.error('Map not initialized');
+                alert('Map not initialized. Please refresh the page.');
+                return;
+            }
+            
+            if (!spotsData || !allSpots || allSpots.length === 0) {
+                console.error('No spots data available. spotsData:', spotsData, 'allSpots:', allSpots);
+                alert('No spots loaded. Please load spots first.');
+                return;
+            }
+            
+            if (index < 0 || index >= allSpots.length) {
+                console.error('Invalid spot index:', index, 'Total spots:', allSpots.length);
+                alert(`Invalid spot index: ${index}. Valid range: 0-${allSpots.length - 1}`);
+                return;
+            }
+            
+            const spot = allSpots[index];
+            console.log('Focusing on spot at index', index, ':', spot);
+            
+            // Validate coordinates
+            const lat = parseFloat(spot.latitude);
+            const lng = parseFloat(spot.longitude);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                console.error('Invalid coordinates:', { latitude: spot.latitude, longitude: spot.longitude });
+                alert('Spot location data is invalid: coordinates are not numbers');
+                return;
+            }
+            
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                console.error('Coordinates out of range:', { lat, lng });
+                alert('Spot location data is invalid: coordinates out of valid range');
+                return;
+            }
+            
+            try {
+                // Fly to spot using Leaflet
+                leafletMap.setView([lat, lng], 15, {
+                    animate: true,
+                    duration: 1.0
+                });
+                
+                // Open popup for the marker if it exists
+                leafletMarkers.forEach(marker => {
+                    if (marker instanceof L.Marker) {
+                        const markerPos = marker.getLatLng();
+                        if (Math.abs(markerPos.lat - lat) < 0.0001 && Math.abs(markerPos.lng - lng) < 0.0001) {
+                            marker.openPopup();
+                        }
+                    }
+                });
+                
+                console.log('✓ Map focused on spot:', { lat, lng });
+                
+            } catch (error) {
+                console.error('Error focusing on location:', error);
+                alert('Error focusing on location: ' + error.message);
+                return;
+            }
+            
+            // Highlight card in sidebar
+            document.querySelectorAll('.spot-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            const card = document.getElementById(`spot-${index}`);
+            if (card) {
+                card.classList.add('selected');
+                // Scroll card into view
+                setTimeout(() => {
+                    card.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                }, 100);
+                selectedSpotIndex = index;
+                console.log('Card highlighted and scrolled:', card.id);
+            }
+        }
+        
+        async function searchFromAPI() {
+            const searchInput = document.getElementById('apiSearchInput');
+            const radiusInput = document.getElementById('apiRadiusInput');
+            const searchBtn = document.getElementById('apiSearchBtn');
+            const statusMsg = document.getElementById('apiStatusMessage');
+            
+            const address = searchInput.value.trim();
+            const radius = parseFloat(radiusInput.value) || 15.0;
+            
+            if (!address) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.color = '#dc3545';
+                statusMsg.textContent = 'Please enter an address or location name';
+                return;
+            }
+            
+            // Disable button and show loading
+            searchBtn.disabled = true;
+            searchBtn.textContent = 'Searching...';
+            statusMsg.style.display = 'block';
+            statusMsg.style.color = '#666';
+            statusMsg.textContent = `Searching for spots near "${address}"...`;
+            
+            try {
+                const url = `${API_BASE_URL}/search`;
+                const params = new URLSearchParams({
+                    address: address,
+                    radius_km: radius.toString()
+                });
+                
+                console.log(`Fetching from API: ${url}?${params}`);
+                
+                const response = await fetch(`${url}?${params}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('API response received:', data);
+                
+                if (!data || !data.spots || !Array.isArray(data.spots)) {
+                    throw new Error('Invalid response format from API');
+                }
+                
+                // Update status
+                statusMsg.style.color = '#28a745';
+                statusMsg.textContent = `✓ Found ${data.spots.length} spots! Loading on map...`;
+                
+                // Load the data into the map
+                spotsData = data;
+                clearMap();
+                displaySpots(data);
+                
+                // Update JSON input with the response (for reference)
+                document.getElementById('jsonInput').value = JSON.stringify(data, null, 2);
+                
+                // Clear filter search
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchResultsInfo').style.display = 'none';
+                
+                // Hide status after 3 seconds
+                setTimeout(() => {
+                    statusMsg.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('API search error:', error);
+                statusMsg.style.color = '#dc3545';
+                statusMsg.textContent = `✗ Error: ${error.message}`;
+                
+                // Show helpful error message
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    statusMsg.textContent += `\n\nAPI might not be running at ${API_BASE_URL}\nTry: python3 drone_spots_api.py or ./start_api_ubuntu.sh`;
+                }
+            } finally {
+                // Re-enable button
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search API';
+            }
+        }
+        
+        // Initialize map on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Allow Enter key to trigger API search
+            const apiSearchInput = document.getElementById('apiSearchInput');
+            if (apiSearchInput) {
+                apiSearchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        searchFromAPI();
+                    }
+                });
+            }
+            
+            // Check if Leaflet is loaded
+            if (typeof L === 'undefined') {
+                console.error('Leaflet.js library not loaded!');
+                alert('Error: Leaflet.js map library failed to load. Please check your internet connection and refresh the page.');
+                return;
+            }
+            
+            try {
+                initMap();
+                console.log('Map initialized successfully');
+                console.log(`API Base URL: ${API_BASE_URL}`);
+                
+                // Verify textarea is accessible and add debugging
+                const jsonInput = document.getElementById('jsonInput');
+                if (jsonInput) {
+                    console.log('✓ JSON textarea found and accessible');
+                    // Ensure it's not disabled
+                    jsonInput.disabled = false;
+                    jsonInput.readOnly = false;
+                    // Add event listeners for debugging
+                    jsonInput.addEventListener('input', function() {
+                        console.log('Textarea input detected, length:', this.value.length);
+                    });
+                    jsonInput.addEventListener('paste', function() {
+                        console.log('Paste event detected');
+                        setTimeout(() => {
+                            console.log('After paste, length:', this.value.length);
+                        }, 100);
+                    });
+                } else {
+                    console.error('✗ JSON textarea not found!');
+                }
+                
+                // Verify button is accessible and add backup event listener
+                const loadButton = document.querySelector('button[onclick="loadMapData()"]');
+                if (loadButton) {
+                    console.log('✓ Load button found');
+                    // Add event listener as backup (in case onclick doesn't work)
+                    loadButton.addEventListener('click', function(e) {
+                        console.log('Button clicked via event listener');
+                        e.preventDefault();
+                        if (typeof window.loadMapData === 'function') {
+                            window.loadMapData();
+                        } else {
+                            console.error('loadMapData function not found!');
+                            alert('Error: loadMapData function not available. Check browser console.');
+                        }
+                    });
+                } else {
+                    console.error('✗ Load button not found!');
+                }
+            } catch (e) {
+                console.error('Error initializing map:', e);
+                alert('Error initializing map: ' + e.message);
+            }
+        });
+    </script>
+</body>
+</html>

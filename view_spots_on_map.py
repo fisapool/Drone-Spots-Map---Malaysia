@@ -74,26 +74,28 @@ def debug_log(session_id, run_id, hypothesis_id, location, message, data=None):
     except Exception:
         pass  # Silently fail if logging fails
 
-def fetch_spots(address=None, latitude=None, longitude=None, radius_km=15.0, max_retries=3):
+def fetch_spots(address=None, latitude=None, longitude=None, postal_code=None, radius_km=15.0, max_retries=3):
     """Fetch drone spots from the API with retry logic"""
     # #region agent log
     session_id = "debug-session"
     run_id = "post-fix"
     debug_log(session_id, run_id, "E", "view_spots_on_map.py:fetch_spots:entry", "Fetch spots started", {
-        "address": address, "latitude": latitude, "longitude": longitude, "radius_km": radius_km
+        "address": address, "latitude": latitude, "longitude": longitude, "postal_code": postal_code, "radius_km": radius_km
     })
     # #endregion
     
     url = f"{API_BASE_URL}/search"
     params = {"radius_km": radius_km}
     
-    if address:
+    if postal_code:
+        params["postal_code"] = postal_code
+    elif address:
         params["address"] = address
     elif latitude and longitude:
         params["latitude"] = latitude
         params["longitude"] = longitude
     else:
-        print("Error: Please provide either an address or latitude/longitude")
+        print("Error: Please provide either an address, postal code, or latitude/longitude")
         return None
     
     # Check API health first
@@ -273,12 +275,14 @@ def main():
     if len(sys.argv) < 2:
         print("Usage:")
         print("  python3 view_spots_on_map.py <address> [--radius <km>]")
+        print("  python3 view_spots_on_map.py --postal <postal_code> [--radius <km>]")
         print("  python3 view_spots_on_map.py --lat <latitude> --lon <longitude> [--radius <km>]")
         print("  python3 view_spots_on_map.py --file <json_file>")
         print("  ./view_spots_on_map.py <address> [--radius <km>]  # If executable")
         print("\nExamples:")
         print("  python3 view_spots_on_map.py 'Bujang Valley Archaeological Museum'")
         print("  python3 view_spots_on_map.py 'Kuala Lumpur' --radius 20")
+        print("  python3 view_spots_on_map.py --postal 50000 --radius 15")
         print("  python3 view_spots_on_map.py --lat 5.737 --lon 100.417 --radius 15")
         print("  python3 view_spots_on_map.py --file response.json")
         sys.exit(1)
@@ -291,6 +295,13 @@ def main():
             sys.exit(1)
         filepath = sys.argv[2]
         data = load_json_file(filepath)
+    elif sys.argv[1] == "--postal":
+        if len(sys.argv) < 3:
+            print("Error: --postal requires a postal code")
+            sys.exit(1)
+        postal_code = sys.argv[2]
+        radius = float(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[3] == "--radius" else 15.0
+        data = fetch_spots(postal_code=postal_code, radius_km=radius)
     elif sys.argv[1] == "--lat" and len(sys.argv) >= 4:
         lat = float(sys.argv[2])
         lon = float(sys.argv[3])
