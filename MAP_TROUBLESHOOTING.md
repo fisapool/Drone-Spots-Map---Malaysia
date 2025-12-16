@@ -111,3 +111,4 @@ When JSON is loaded successfully:
 - Map centers on the query location
 - You can click markers to see details
 
+

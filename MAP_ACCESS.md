@@ -77,3 +77,4 @@ The `view_spots_on_map.py` script uses:
 - Map data is loaded client-side (works offline once loaded)
 - The map endpoint is available at `/map` on the API server
 
+
